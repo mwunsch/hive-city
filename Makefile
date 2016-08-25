@@ -1,11 +1,11 @@
 .SUFFIXES:
 
 SRC := src/Main.elm
-OBJDIR := target
+OBJDIR := dist
 OBJECT := $(OBJDIR)/index.js
 
 $(OBJECT): $(SRC) | $(OBJDIR)
-	elm make $< --output $@
+	elm make --yes $< --output $@
 
 $(OBJDIR):
 	mkdir -p $@
