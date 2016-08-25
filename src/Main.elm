@@ -26,13 +26,13 @@ init =
 
 type Msg = Tick Time
 
-port tick : String -> Cmd msg
+port tick : Time -> Cmd msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Tick newTime ->
-            (newTime, tick (toString newTime))
+            (newTime, tick newTime)
 
 -- SUBSCRIPTIONS
 
