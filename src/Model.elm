@@ -16,13 +16,17 @@ From the rulebook:
 
 -}
 
-type alias Inch = Int
+
+type alias Inch =
+    Int
+
 
 type alias Position =
     { x : Int
     , y : Int
     , z : Int
     }
+
 
 {-| From the rulebook:
 
@@ -78,13 +82,13 @@ type alias Position =
 type alias Characteristics =
     { move : Inch
     , weaponSkill : Int
-    , ballisticSkill: Int
-    , strength: Int
-    , toughness: Int
-    , wounds: Int
-    , initiative: Int
-    , attacks: Int
-    , leadership: Int
+    , ballisticSkill : Int
+    , strength : Int
+    , toughness : Int
+    , wounds : Int
+    , initiative : Int
+    , attacks : Int
+    , leadership : Int
     }
 
 
@@ -96,8 +100,13 @@ type alias Model =
     , injury : Maybe Injury
     }
 
+
 move : Model -> Position -> Model
 move model pos =
     { model | position = pos }
 
-type Injury = FleshWound | Down | OutOfAction
+
+type Injury
+    = FleshWound
+    | Down
+    | OutOfAction
