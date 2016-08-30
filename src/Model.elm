@@ -101,6 +101,29 @@ type alias Model =
     }
 
 
+averageFighterProfile : Characteristics
+averageFighterProfile =
+    { move = 4
+    , weaponSkill = 3
+    , ballisticSkill = 3
+    , strength = 3
+    , toughness = 3
+    , wounds = 1
+    , initiative = 3
+    , attacks = 1
+    , leadership = 7
+    }
+
+averageFighter : Position -> Model
+averageFighter pos =
+    { profile = averageFighterProfile
+    , position = pos
+    , hidden = False
+    , pinned = False
+    , injury = Nothing
+    }
+
+
 move : Model -> Position -> Model
 move model pos =
     { model | position = pos }
