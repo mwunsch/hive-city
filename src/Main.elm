@@ -1,11 +1,12 @@
-port module Main exposing (..)
+import Model exposing (Model)
 
 import Html exposing (Html)
 import Html.App as App
+import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Time exposing (Time, second)
 
+main : Program Never
 main =
     App.program
         { init = init
@@ -16,45 +17,57 @@ main =
 
 -- MODEL
 
-type alias Model = Time
+type alias GameState =
+    { fighter: Model
+    , playerSelection : Maybe Model
+    }
 
-init : (Model, Cmd Msg)
+init : (GameState, Cmd Msg)
 init =
-    (0, Cmd.none)
+    ({ fighter = Model.averageFighter { x = 50
+                                      , y = 50
+                                      , z = 0
+                                      }
+     , playerSelection = Nothing
+     }
+    , Cmd.none)
 
 -- UPDATE
 
-type Msg = Tick Time
+type Msg =
+    Select Model
 
-port tick : Time -> Cmd msg
-
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
+update : Msg -> GameState -> (GameState, Cmd Msg)
+update msg game =
     case msg of
-        Tick newTime ->
-            (newTime, tick newTime)
+        Select fighter ->
+            ({ game | playerSelection = Just fighter }, Cmd.none)
 
 -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Time.every second Tick
+subscriptions : GameState -> Sub Msg
+subscriptions game =
+    Sub.none
 
 -- VIEW
 
-view : Model -> Html Msg
-view model =
+view : GameState -> Html Msg
+view game =
     let
-        angle =
-            turns (Time.inMinutes model)
+        fighter = "@"
 
-        handX =
-            toString (50 + 40 * cos angle)
-
-        handY =
-            toString (50 + 40 * sin angle)
+        color =
+            case game.playerSelection of
+                Nothing -> "black"
+                Just x -> "red"
     in
-        svg [ viewBox "0 0 100 100", width "300 px" ]
-            [ circle [ cx "50", cy "50", r "45", fill "#0B79CE" ] []
-            , line [ x1 "50", y1 "50", x2 handX, y2 handY, stroke "#023963" ] []
+        svg [ viewBox "0 0 100 100", width "100%" ]
+            [ text' [ fontSize "20"
+                    , fontFamily "monospace"
+                    , textAnchor "middle"
+                    , onClick (Select game.fighter)
+                    , Svg.Attributes.cursor "pointer"
+                    , x (toString game.fighter.position.x)
+                    , y (toString game.fighter.position.y)
+                    , fill color ] [text fighter]
             ]
