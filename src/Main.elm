@@ -91,8 +91,8 @@ view game =
                 , textAnchor "middle"
                 , onClick (Select game.fighter)
                 , Svg.Attributes.cursor "pointer"
-                , x (toString game.fighter.position.x)
-                , y (toString game.fighter.position.y)
+                , x (game.fighter.position.x |> toString)
+                , y (game.fighter.position.y |> toString)
                 , fill color
                 ]
                 [ text fighter ]
