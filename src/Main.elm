@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Model exposing (Model)
+import Tabletop exposing (posX, posY)
 import Html exposing (Html)
 import Html.App as App
 import Html.Events exposing (onClick)
@@ -31,11 +32,7 @@ type alias GameState =
 init : ( GameState, Cmd Msg )
 init =
     ( { fighter =
-            Model.averageFighter
-                { x = 50
-                , y = 50
-                , z = 0
-                }
+            Model.averageFighter ( 50, 50 )
       , playerSelection = Nothing
       }
     , Cmd.none
@@ -91,8 +88,8 @@ view game =
                 , textAnchor "middle"
                 , onClick (Select game.fighter)
                 , Svg.Attributes.cursor "pointer"
-                , x (game.fighter.position.x |> toString)
-                , y (game.fighter.position.y |> toString)
+                , x (game.fighter.position |> posX |> toString)
+                , y (game.fighter.position |> posY |> toString)
                 , fill color
                 ]
                 [ text fighter ]

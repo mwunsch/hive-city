@@ -16,17 +16,7 @@ From the rulebook:
 
 -}
 
-
-type alias Inch =
-    Int
-
-
-type alias Position =
-    { x : Int
-    , y : Int
-    , z : Int
-    }
-
+import Tabletop exposing (Position, Inch)
 
 {-| From the rulebook:
 
