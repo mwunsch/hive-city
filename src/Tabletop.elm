@@ -1,5 +1,8 @@
 module Tabletop exposing (..)
 
+{-| The Tabletop module exposes types and functions related to the structure of the game board as well as positioning and movement on the board.
+
+-}
 
 type alias Position =
     ( Int, Int )
