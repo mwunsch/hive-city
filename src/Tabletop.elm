@@ -5,10 +5,11 @@ type alias Position =
     ( Int, Int )
 
 
+posX : Position -> Int
 posX ( x', _ ) =
     x'
 
-
+posY : Position -> Int
 posY ( _, y' ) =
     y'
 
