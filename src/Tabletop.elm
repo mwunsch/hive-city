@@ -3,10 +3,17 @@ module Tabletop exposing (..)
 import Html exposing (Html)
 import Svg exposing (..)
 
-{-| The Tabletop module exposes types and functions related to the structure of
-the game board as well as positioning and movement on the board.
+
+{-| The Tabletop module exposes types and functions related to the
+structure of the game board as well as positioning and movement on the
+board.
 
 -}
+type alias Tabletop =
+    { width : Int
+    , height : Int
+    }
+
 
 type alias Position =
     ( Int, Int )
@@ -26,11 +33,6 @@ type alias Inch =
     Int
 
 
-type alias Tabletop =
-    { width : Int
-    , height : Int
-    }
-
 view : Tabletop -> Html Msg
 view tabletop =
-    svg [ ] [ ]
+    svg [] []
