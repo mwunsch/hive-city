@@ -1,10 +1,9 @@
 module Main exposing (..)
 
 import Model exposing (Model)
-import Tabletop exposing (posX, posY)
+import Tabletop exposing (posX, posY, Tabletop)
 import Html exposing (Html)
 import Html.App as App
-import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
@@ -80,17 +79,8 @@ view game =
 
                 Just x ->
                     "red"
+
+        tabletop = Tabletop 100 50
     in
         svg [ viewBox "0 0 100 100", width "100%" ]
-            [ text'
-                [ fontSize "20"
-                , fontFamily "monospace"
-                , textAnchor "middle"
-                , onClick (Select game.fighter)
-                , Svg.Attributes.cursor "pointer"
-                , x (game.fighter.position |> posX |> toString)
-                , y (game.fighter.position |> posY |> toString)
-                , fill color
-                ]
-                [ text fighter ]
-            ]
+            [ Tabletop.view tabletop [] ]

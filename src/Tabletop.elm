@@ -1,7 +1,7 @@
 module Tabletop exposing (..)
 
-import Html exposing (Html)
-import Svg exposing (..)
+import Svg exposing (rect, Svg)
+import Svg.Attributes exposing (..)
 
 
 {-| The Tabletop module exposes types and functions related to the
@@ -33,6 +33,9 @@ type alias Inch =
     Int
 
 
-view : Tabletop -> Html Msg
-view tabletop =
-    svg [] []
+view : Tabletop -> List (Svg msg) -> Svg msg
+view tabletop children =
+    rect [ width (tabletop.width |> toString)
+         , height (tabletop.height |> toString)
+         , fill "red"
+         ] children
