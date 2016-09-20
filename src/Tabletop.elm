@@ -35,7 +35,9 @@ type alias Inch =
 
 view : Tabletop -> List (Svg msg) -> Svg msg
 view tabletop children =
-    rect [ width (tabletop.width |> toString)
-         , height (tabletop.height |> toString)
-         , fill "red"
-         ] children
+    rect
+        [ width (tabletop.width |> toString)
+        , height (tabletop.height |> toString)
+        , fill "red"
+        ]
+        children

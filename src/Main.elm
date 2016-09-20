@@ -4,6 +4,7 @@ import Model exposing (Model)
 import Tabletop exposing (posX, posY, Tabletop)
 import Html exposing (Html)
 import Html.App as App
+import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
@@ -31,7 +32,7 @@ type alias GameState =
 init : ( GameState, Cmd Msg )
 init =
     ( { fighter =
-            Model.averageFighter ( 50, 50 )
+            Model.averageFighter ( 50, 25 )
       , playerSelection = Nothing
       }
     , Cmd.none
@@ -78,9 +79,23 @@ view game =
                     "black"
 
                 Just x ->
-                    "red"
+                    "white"
 
-        tabletop = Tabletop 100 50
+        tabletop =
+            Tabletop 100 50
     in
         svg [ viewBox "0 0 100 100", width "100%" ]
-            [ Tabletop.view tabletop [] ]
+            [ (Tabletop.view tabletop [])
+            , (text'
+                [ fontSize "4"
+                , fontFamily "monospace"
+                , textAnchor "middle"
+                , fill color
+                , x (game.fighter.position |> posX |> toString)
+                , y (game.fighter.position |> posY |> toString)
+                , onClick (Select game.fighter)
+                , Svg.Attributes.cursor "pointer"
+                ]
+                [ text fighter ]
+              )
+            ]
