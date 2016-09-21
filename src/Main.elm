@@ -45,6 +45,7 @@ init =
 
 type Msg
     = Select Model
+    | Deselect
 
 
 update : Msg -> GameState -> ( GameState, Cmd Msg )
@@ -52,6 +53,9 @@ update msg game =
     case msg of
         Select fighter ->
             ( { game | playerSelection = Just fighter }, Cmd.none )
+
+        Deselect ->
+            ( { game | playerSelection = Nothing }, Cmd.none )
 
 
 
@@ -71,7 +75,17 @@ view : GameState -> Html Msg
 view game =
     let
         fighter =
-            "@"
+            text'
+                [ fontSize "1"
+                , fontFamily "monospace"
+                , textAnchor "middle"
+                , fill color
+                , x (game.fighter.position |> posX |> toString)
+                , y (game.fighter.position |> posY |> toString)
+                , onClick (Select game.fighter)
+                , Svg.Attributes.cursor "pointer"
+                ]
+                [ text "@" ]
 
         color =
             case game.playerSelection of
@@ -81,21 +95,29 @@ view game =
                 Just x ->
                     "white"
 
+        movementArea =
+            case game.playerSelection of
+                Nothing ->
+                    []
+
+                Just x ->
+                    [ circle
+                        [ cx (x.position |> posX |> toString)
+                        , cy (x.position |> posY |> toString)
+                        , r (x.profile.move |> toString)
+                        , fill "pink"
+                        , fillOpacity "0.5"
+                        ]
+                        []
+                    ]
+
         tabletop =
             Tabletop 100 50
     in
         svg [ viewBox "0 0 100 100", width "100%" ]
-            [ (Tabletop.view tabletop [])
-            , (text'
-                [ fontSize "4"
-                , fontFamily "monospace"
-                , textAnchor "middle"
-                , fill color
-                , x (game.fighter.position |> posX |> toString)
-                , y (game.fighter.position |> posY |> toString)
-                , onClick (Select game.fighter)
-                , Svg.Attributes.cursor "pointer"
+            (List.append
+                [ (Tabletop.view tabletop [])
+                , fighter
                 ]
-                [ text fighter ]
-              )
-            ]
+                movementArea
+            )
