@@ -46,6 +46,7 @@ init =
 type Msg
     = Select Model
     | Deselect
+    | NoOp
 
 
 update : Msg -> GameState -> ( GameState, Cmd Msg )
@@ -56,6 +57,9 @@ update msg game =
 
         Deselect ->
             ( { game | playerSelection = Nothing }, Cmd.none )
+
+        NoOp ->
+            ( game, Cmd.none )
 
 
 
@@ -114,7 +118,18 @@ view game =
         tabletop =
             Tabletop 100 50
     in
-        svg [ viewBox "0 0 100 100", width "100%" ]
+        svg
+            [ viewBox "0 0 100 100"
+            , width "100%"
+            , onClick
+                (case game.playerSelection of
+                    Just x ->
+                        Deselect
+
+                    Nothing ->
+                        NoOp
+                )
+            ]
             (List.append
                 [ (Tabletop.view tabletop [])
                 , fighter
