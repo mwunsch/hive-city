@@ -7,6 +7,7 @@ import Html.App as App
 import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Mouse
 
 
 main : Program Never
@@ -46,6 +47,7 @@ init =
 type Msg
     = Select Model
     | Deselect
+    | Click Mouse.Position  -- SVG Coordinate transformation. Dang.
     | NoOp
 
 
@@ -58,6 +60,18 @@ update msg game =
         Deselect ->
             ( { game | playerSelection = Nothing }, Cmd.none )
 
+        Click position ->
+            let
+                moveFighter =
+                    case game.playerSelection of
+                        Just fighter ->
+                            Model.move fighter ( position.x, position.y )
+
+                        Nothing ->
+                            game.fighter
+            in
+                ( { game | fighter = moveFighter }, Cmd.none )
+
         NoOp ->
             ( game, Cmd.none )
 
@@ -68,7 +82,7 @@ update msg game =
 
 subscriptions : GameState -> Sub Msg
 subscriptions game =
-    Sub.none
+    Mouse.clicks Click
 
 
 
