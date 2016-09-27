@@ -82,7 +82,7 @@ update msg game =
 
 subscriptions : GameState -> Sub Msg
 subscriptions game =
-    Mouse.clicks Click
+    Sub.none
 
 
 
@@ -116,15 +116,16 @@ view game =
         movementArea =
             case game.playerSelection of
                 Nothing ->
-                    []
+                    [ fighter ]
 
                 Just x ->
-                    [ circle
+                    [ fighter
+                    , circle
                         [ cx (x.position |> posX |> toString)
                         , cy (x.position |> posY |> toString)
                         , r (x.profile.move |> toString)
-                        , fill "pink"
-                        , fillOpacity "0.5"
+                        , fill "white"
+                        , fillOpacity "0.25"
                         ]
                         []
                     ]
@@ -134,7 +135,6 @@ view game =
     in
         svg
             [ viewBox "0 0 100 100"
-            , width "100%"
             , onClick
                 (case game.playerSelection of
                     Just x ->
@@ -144,9 +144,4 @@ view game =
                         NoOp
                 )
             ]
-            (List.append
-                [ (Tabletop.view tabletop [])
-                , fighter
-                ]
-                movementArea
-            )
+            (Tabletop.view tabletop [] :: movementArea)
