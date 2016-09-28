@@ -8,6 +8,8 @@ import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Mouse
+import Window
+import Task
 
 
 main : Program Never
@@ -27,6 +29,7 @@ main =
 type alias GameState =
     { fighter : Model
     , playerSelection : Maybe Model
+    , windowWidth : Int
     }
 
 
@@ -35,8 +38,9 @@ init =
     ( { fighter =
             Model.averageFighter ( 50, 25 )
       , playerSelection = Nothing
+      , windowWidth = 1000
       }
-    , Cmd.none
+    , Task.perform (\_ -> NoOp) Resize Window.width
     )
 
 
@@ -47,7 +51,8 @@ init =
 type Msg
     = Select Model
     | Deselect
-    | Click Mouse.Position  -- SVG Coordinate transformation. Dang.
+    | Click Mouse.Position
+    | Resize Int
     | NoOp
 
 
@@ -72,6 +77,9 @@ update msg game =
             in
                 ( { game | fighter = moveFighter }, Cmd.none )
 
+        Resize w ->
+            ( { game | windowWidth = w }, Cmd.none )
+
         NoOp ->
             ( game, Cmd.none )
 
@@ -82,7 +90,7 @@ update msg game =
 
 subscriptions : GameState -> Sub Msg
 subscriptions game =
-    Sub.none
+    Window.resizes (\size -> Resize size.width)
 
 
 
@@ -135,6 +143,7 @@ view game =
     in
         svg
             [ viewBox "0 0 100 100"
+            , width (game.windowWidth |> toString)
             , onClick
                 (case game.playerSelection of
                     Just x ->
