@@ -10,6 +10,8 @@ import Svg.Attributes exposing (..)
 import Mouse
 import Window
 import Task
+import String exposing (join)
+import List exposing (map)
 
 
 main : Program Never
@@ -106,9 +108,9 @@ view game =
                 , fontFamily "monospace"
                 , textAnchor "middle"
                 , fill color
-                , x (game.fighter.position |> posX |> toString)
-                , y (game.fighter.position |> posY |> toString)
-                , onClick (Select game.fighter)
+                , game.fighter.position |> posX |> toString |> x
+                , game.fighter.position |> posY |> toString |> y
+                , onClick <| Select game.fighter
                 , Svg.Attributes.cursor "pointer"
                 ]
                 [ text "@" ]
@@ -142,7 +144,7 @@ view game =
             Tabletop 100 50
     in
         svg
-            [ viewBox "0 0 100 100"
+            [ [ 0, 0, tabletop.width, tabletop.height ] |> map toString |> join " " |> viewBox
             , width (game.windowWidth |> toString)
             , onClick
                 (case game.playerSelection of
