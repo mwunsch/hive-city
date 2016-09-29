@@ -1,17 +1,19 @@
 module Main exposing (..)
 
-import Model exposing (Model)
-import Tabletop exposing (posX, posY, Tabletop)
 import Html exposing (Html)
 import Html.App as App
-import Html.Events exposing (onClick)
+import Html.Events exposing (on, onClick)
+import Json.Decode as Json exposing ((:=))
+import List exposing (map)
+import Maybe exposing (andThen)
+import Model exposing (Model)
+import Mouse
+import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Mouse
-import Window
+import Tabletop exposing (posX, posY, Tabletop)
 import Task
-import String exposing (join)
-import List exposing (map)
+import Window
 
 
 main : Program Never
@@ -32,6 +34,7 @@ type alias GameState =
     { fighter : Model
     , playerSelection : Maybe Model
     , windowWidth : Int
+    , windowScale : Float
     }
 
 
@@ -41,6 +44,7 @@ init =
             Model.averageFighter ( 50, 25 )
       , playerSelection = Nothing
       , windowWidth = 1000
+      , windowScale = 10
       }
     , Task.perform (\_ -> NoOp) Resize Window.width
     )
@@ -52,7 +56,6 @@ init =
 
 type Msg
     = Select Model
-    | Deselect
     | Click Mouse.Position
     | Resize Int
     | NoOp
@@ -64,23 +67,36 @@ update msg game =
         Select fighter ->
             ( { game | playerSelection = Just fighter }, Cmd.none )
 
-        Deselect ->
-            ( { game | playerSelection = Nothing }, Cmd.none )
-
-        Click position ->
+        Click { x, y } ->
             let
+                scale =
+                    game.windowScale
+
                 moveFighter =
                     case game.playerSelection of
                         Just fighter ->
-                            Model.move fighter ( position.x, position.y )
+                            Model.move fighter
+                                ( round <| (toFloat x) / scale
+                                , round <| (toFloat y) / scale
+                                )
 
                         Nothing ->
                             game.fighter
             in
-                ( { game | fighter = moveFighter }, Cmd.none )
+                ( { game
+                    | fighter = moveFighter
+                    , playerSelection = game.playerSelection `andThen` \_ -> Just moveFighter
+                  }
+                , Cmd.none
+                )
 
         Resize w ->
-            ( { game | windowWidth = w }, Cmd.none )
+            ( { game
+                | windowWidth = w
+                , windowScale = (toFloat w) / 100
+              }
+            , Cmd.none
+            )
 
         NoOp ->
             ( game, Cmd.none )
@@ -99,6 +115,15 @@ subscriptions game =
 -- VIEW
 
 
+onClickWithCoords : (Mouse.Position -> msg) -> Html.Attribute msg
+onClickWithCoords message =
+    on "click" <|
+        Json.map message <|
+            Json.object2 Mouse.Position
+                ("clientX" := Json.int)
+                ("clientY" := Json.int)
+
+
 view : GameState -> Html Msg
 view game =
     let
@@ -108,8 +133,10 @@ view game =
                 , fontFamily "monospace"
                 , textAnchor "middle"
                 , fill color
-                , game.fighter.position |> posX |> toString |> x
-                , game.fighter.position |> posY |> toString |> y
+                , x
+                    (game.fighter.position |> posX |> toString)
+                , y
+                    (game.fighter.position |> posY |> toString)
                 , onClick <| Select game.fighter
                 , Svg.Attributes.cursor "pointer"
                 ]
@@ -144,15 +171,10 @@ view game =
             Tabletop 100 50
     in
         svg
-            [ [ 0, 0, tabletop.width, tabletop.height ] |> map toString |> join " " |> viewBox
-            , width (game.windowWidth |> toString)
-            , onClick
-                (case game.playerSelection of
-                    Just x ->
-                        Deselect
-
-                    Nothing ->
-                        NoOp
-                )
+            [ viewBox
+                ([ 0, 0, tabletop.width, tabletop.height ] |> map toString |> join " ")
+            , width
+                (game.windowWidth |> toString)
+            , onClickWithCoords Click
             ]
             (Tabletop.view tabletop [] :: movementArea)
