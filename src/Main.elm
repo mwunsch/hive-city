@@ -33,6 +33,7 @@ main =
 type alias GameState =
     { fighter : Model
     , playerSelection : Maybe Model
+    , tabletop : Tabletop
     , windowWidth : Int
     , windowScale : Float
     }
@@ -43,6 +44,7 @@ init =
     ( { fighter =
             Model.averageFighter ( 50, 25 )
       , playerSelection = Nothing
+      , tabletop = Tabletop 100 50
       , windowWidth = 1000
       , windowScale = 10
       }
@@ -69,15 +71,12 @@ update msg game =
 
         Click { x, y } ->
             let
-                scale =
-                    game.windowScale
-
                 moveFighter =
                     case game.playerSelection of
                         Just fighter ->
                             Model.move fighter
-                                ( round <| (toFloat x) / scale
-                                , round <| (toFloat y) / scale
+                                ( round <| (toFloat x) / game.windowScale
+                                , round <| (toFloat y) / game.windowScale
                                 )
 
                         Nothing ->
@@ -93,7 +92,7 @@ update msg game =
         Resize w ->
             ( { game
                 | windowWidth = w
-                , windowScale = (toFloat w) / 100
+                , windowScale = (toFloat w) / (toFloat game.tabletop.width)
               }
             , Cmd.none
             )
@@ -166,15 +165,12 @@ view game =
                         ]
                         []
                     ]
-
-        tabletop =
-            Tabletop 100 50
     in
         svg
             [ viewBox
-                ([ 0, 0, tabletop.width, tabletop.height ] |> map toString |> join " ")
+                ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
             , width
                 (game.windowWidth |> toString)
             , onClickWithCoords Click
             ]
-            (Tabletop.view tabletop [] :: movementArea)
+            (Tabletop.view game.tabletop [] :: movementArea)
