@@ -127,19 +127,7 @@ view : GameState -> Html Msg
 view game =
     let
         fighter =
-            text'
-                [ fontSize "1"
-                , fontFamily "monospace"
-                , textAnchor "middle"
-                , fill color
-                , x
-                    (game.fighter.position |> posX |> toString)
-                , y
-                    (game.fighter.position |> posY |> toString)
-                , onClick <| Select game.fighter
-                , Svg.Attributes.cursor "pointer"
-                ]
-                [ text "@" ]
+            Model.view game.fighter <| Select game.fighter
 
         color =
             case game.playerSelection of

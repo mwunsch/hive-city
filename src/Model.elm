@@ -16,7 +16,11 @@ From the rulebook:
 
 -}
 
-import Tabletop exposing (Position, Inch)
+import Html.Events exposing (onClick)
+import Svg exposing (..)
+import Svg.Attributes exposing (..)
+import Tabletop exposing (Position, Inch, posX, posY)
+
 
 {-| From the rulebook:
 
@@ -88,6 +92,7 @@ type alias Model =
     , hidden : Bool
     , pinned : Bool
     , injury : Maybe Injury
+    , remainingMove : Inch
     }
 
 
@@ -104,6 +109,7 @@ averageFighterProfile =
     , leadership = 7
     }
 
+
 averageFighter : Position -> Model
 averageFighter pos =
     { profile = averageFighterProfile
@@ -111,6 +117,7 @@ averageFighter pos =
     , hidden = False
     , pinned = False
     , injury = Nothing
+    , remainingMove = averageFighterProfile.move
     }
 
 
@@ -119,7 +126,29 @@ move model pos =
     { model | position = pos }
 
 
+attemptMove : Model -> Position -> Result ( String, Model ) Model
+attemptMove model pos =
+    Ok { model | position = pos }
+
+
 type Injury
     = FleshWound
     | Down
     | OutOfAction
+
+
+view : Model -> msg -> Svg msg
+view model msg =
+    text'
+        [ fontSize "1"
+        , fontFamily "monospace"
+        , textAnchor "middle"
+        , fill "black"
+        , x
+            (model.position |> posX |> toString)
+        , y
+            (model.position |> posY |> toString)
+        , onClick msg
+        , Svg.Attributes.cursor "pointer"
+        ]
+        [ text "@" ]
