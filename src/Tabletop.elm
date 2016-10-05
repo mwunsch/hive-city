@@ -29,6 +29,20 @@ posY ( _, y' ) =
     y'
 
 
+positionFromMouseCoords : ( Int, Int ) -> Float -> Position
+positionFromMouseCoords ( x, y ) scale =
+    let
+        transform : Int -> Int
+        transform a =
+            round <| (toFloat a) / scale
+
+        x' = transform x
+
+        y' = transform y
+    in
+        ( x', y' )
+
+
 type alias Inch =
     Int
 

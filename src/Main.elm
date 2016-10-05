@@ -11,7 +11,7 @@ import Mouse
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (posX, posY, Tabletop)
+import Tabletop exposing (posX, posY, Tabletop, positionFromMouseCoords)
 import Task
 import Window
 
@@ -36,6 +36,7 @@ type alias GameState =
     , tabletop : Tabletop
     , windowWidth : Int
     , windowScale : Float
+    , movementIntention : Tabletop.Position
     }
 
 
@@ -47,6 +48,7 @@ init =
       , tabletop = Tabletop 100 50
       , windowWidth = 1000
       , windowScale = 10
+      , movementIntention = ( 50, 25 )
       }
     , Task.perform (\_ -> NoOp) Resize Window.width
     )
@@ -59,6 +61,7 @@ init =
 type Msg
     = Select Model
     | Click Mouse.Position
+    | Hover Mouse.Position
     | Resize Int
     | NoOp
 
@@ -74,10 +77,7 @@ update msg game =
                 moveFighter =
                     case game.playerSelection of
                         Just fighter ->
-                            Model.move fighter
-                                ( round <| (toFloat x) / game.windowScale
-                                , round <| (toFloat y) / game.windowScale
-                                )
+                            Model.move fighter <| positionFromMouseCoords ( x, y ) game.windowScale
 
                         Nothing ->
                             game.fighter
@@ -88,6 +88,18 @@ update msg game =
                   }
                 , Cmd.none
                 )
+
+        Hover { x, y } ->
+            case game.playerSelection of
+                Just fighter ->
+                    ( { game
+                        | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale
+                      }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( game, Cmd.none )
 
         Resize w ->
             ( { game
@@ -107,7 +119,10 @@ update msg game =
 
 subscriptions : GameState -> Sub Msg
 subscriptions game =
-    Window.resizes (\size -> Resize size.width)
+    Sub.batch
+        [ Mouse.moves Hover
+        , Window.resizes (\size -> Resize size.width)
+        ]
 
 
 
@@ -144,14 +159,7 @@ view game =
 
                 Just x ->
                     [ fighter
-                    , circle
-                        [ cx (x.position |> posX |> toString)
-                        , cy (x.position |> posY |> toString)
-                        , r (x.profile.move |> toString)
-                        , fill "white"
-                        , fillOpacity "0.25"
-                        ]
-                        []
+                    , Model.movementView x game.movementIntention
                     ]
     in
         svg

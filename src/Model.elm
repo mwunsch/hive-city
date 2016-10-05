@@ -152,3 +152,23 @@ view model msg =
         , Svg.Attributes.cursor "pointer"
         ]
         [ text "@" ]
+
+
+movementView : Model -> Position -> Svg msg
+movementView model pos =
+    let
+        ( modelX, modelY ) =
+            model.position
+
+        ( newX, newY ) =
+            pos
+    in
+        line
+            [ x1 (modelX |> toString)
+            , y1 (modelY |> toString)
+            , x2 (newX |> toString)
+            , y2 (newY |> toString)
+            , stroke "white"
+            , strokeWidth "0.25"
+            ]
+            []
