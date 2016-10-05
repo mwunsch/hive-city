@@ -132,10 +132,7 @@ subscriptions game =
 onClickWithCoords : (Mouse.Position -> msg) -> Html.Attribute msg
 onClickWithCoords message =
     on "click" <|
-        Json.map message <|
-            Json.object2 Mouse.Position
-                ("clientX" := Json.int)
-                ("clientY" := Json.int)
+        Json.map message Mouse.position
 
 
 view : GameState -> Html Msg
