@@ -16,15 +16,15 @@ type alias Tabletop =
 
 
 type alias Position =
-    ( Int, Int )
+    ( Float, Float )
 
 
-posX : Position -> Int
+posX : Position -> Float
 posX ( x', _ ) =
     x'
 
 
-posY : Position -> Int
+posY : Position -> Float
 posY ( _, y' ) =
     y'
 
@@ -32,9 +32,9 @@ posY ( _, y' ) =
 positionFromMouseCoords : ( Int, Int ) -> Float -> Position
 positionFromMouseCoords ( x, y ) scale =
     let
-        transform : Int -> Int
+        transform : Int -> Float
         transform a =
-            round <| (toFloat a) / scale
+            (toFloat a) / scale
 
         x' =
             transform x
@@ -58,9 +58,33 @@ distance ( x1, y1 ) ( x2, y2 ) =
         x' =
             (x1 - x2) ^ 2
     in
-        (x' + y')
-            |> toFloat
-            |> sqrt
+        (x' + y') |> sqrt
+
+
+positionFromDirection : Position -> Position -> Float -> Position
+positionFromDirection start end len =
+    let
+        h =
+            distance start end
+
+        x' =
+            (posX end) - (posX start)
+
+        y' =
+            (posY end) - (posY start)
+
+        angle =
+            acos <| y' / h
+
+        co =
+            if x' > 0 then
+                1
+            else
+                -1
+    in
+        ( (posX start) + (sin angle * len) * co
+        , (posY start) + (cos angle * len)
+        )
 
 
 view : Tabletop -> List (Svg msg) -> Svg msg

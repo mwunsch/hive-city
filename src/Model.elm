@@ -121,14 +121,33 @@ averageFighter pos =
     }
 
 
+
+-- TODO: move movement logic into attemptMove
+
+
 move : Model -> Position -> Model
 move model pos =
-    { model | position = pos }
+    let
+        distance =
+            Tabletop.distance model.position pos
+
+        newPos =
+            if distance > (toFloat model.remainingMove) then
+                maxAllowedMovement model pos
+            else
+                pos
+    in
+        { model | position = newPos }
 
 
 attemptMove : Model -> Position -> Result ( String, Model ) Model
 attemptMove model pos =
     Ok { model | position = pos }
+
+
+maxAllowedMovement : Model -> Position -> Position
+maxAllowedMovement model intent =
+    Tabletop.positionFromDirection model.position intent (toFloat model.remainingMove)
 
 
 type Injury
@@ -162,13 +181,33 @@ movementView model pos =
 
         ( newX, newY ) =
             pos
+
+        distance =
+            Tabletop.distance model.position pos
+
+        ( maxX, maxY ) =
+            if distance > (toFloat model.remainingMove) then
+                maxAllowedMovement model pos
+            else
+                pos
     in
-        line
-            [ x1 (modelX |> toString)
-            , y1 (modelY |> toString)
-            , x2 (newX |> toString)
-            , y2 (newY |> toString)
-            , stroke "white"
-            , strokeWidth "0.25"
+        g []
+            [ line
+                [ x1 (modelX |> toString)
+                , y1 (modelY |> toString)
+                , x2 (maxX |> toString)
+                , y2 (maxY |> toString)
+                , stroke "white"
+                , strokeWidth "0.25"
+                ]
+                []
+            , line
+                [ x1 (maxX |> toString)
+                , y1 (maxY |> toString)
+                , x2 (newX |> toString)
+                , y2 (newY |> toString)
+                , stroke "grey"
+                , strokeWidth "0.25"
+                ]
+                []
             ]
-            []
