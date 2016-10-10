@@ -86,13 +86,18 @@ type alias Characteristics =
     }
 
 
+type alias Id =
+    Int
+
+
 type alias Model =
     { profile : Characteristics
     , position : Position
     , hidden : Bool
     , pinned : Bool
     , injury : Maybe Injury
-    , remainingMove : Inch
+    , remainingMove : Float
+    , id : Id
     }
 
 
@@ -117,37 +122,43 @@ averageFighter pos =
     , hidden = False
     , pinned = False
     , injury = Nothing
-    , remainingMove = averageFighterProfile.move
+    , remainingMove = (toFloat averageFighterProfile.move)
+    , id = 1
     }
 
 
+type alias MovementError =
+    ( String, Model )
 
--- TODO: move movement logic into attemptMove
 
-
-move : Model -> Position -> Model
-move model pos =
+attemptMove : Model -> Position -> Result MovementError Model
+attemptMove model pos =
     let
         distance =
             Tabletop.distance model.position pos
 
-        newPos =
-            if distance > (toFloat model.remainingMove) then
-                maxAllowedMovement model pos
-            else
-                pos
+        allowableDistance =
+            model.remainingMove - distance
     in
-        { model | position = newPos }
-
-
-attemptMove : Model -> Position -> Result ( String, Model ) Model
-attemptMove model pos =
-    Ok { model | position = pos }
+        if allowableDistance >= 0 then
+            Ok
+                { model
+                    | position = pos
+                    , remainingMove = allowableDistance
+                }
+        else
+            Err
+                ( "Can't move there"
+                , { model
+                    | position = maxAllowedMovement model pos
+                    , remainingMove = 0
+                  }
+                )
 
 
 maxAllowedMovement : Model -> Position -> Position
 maxAllowedMovement model intent =
-    Tabletop.positionFromDirection model.position intent (toFloat model.remainingMove)
+    Tabletop.positionFromDirection model.position intent model.remainingMove
 
 
 type Injury
@@ -186,7 +197,7 @@ movementView model pos =
             Tabletop.distance model.position pos
 
         ( maxX, maxY ) =
-            if distance > (toFloat model.remainingMove) then
+            if distance > model.remainingMove then
                 maxAllowedMovement model pos
             else
                 pos

@@ -74,20 +74,30 @@ update msg game =
 
         Click { x, y } ->
             let
+                moveFighter : Result Model.MovementError Model
                 moveFighter =
                     case game.playerSelection of
                         Just fighter ->
-                            Model.move fighter <| positionFromMouseCoords ( x, y ) game.windowScale
+                            Model.attemptMove fighter <| positionFromMouseCoords ( x, y ) game.windowScale
 
                         Nothing ->
-                            game.fighter
+                            Ok game.fighter
+
+                updateGame =
+                    case moveFighter of
+                        Ok m ->
+                            { game
+                                | fighter = m
+                                , playerSelection = game.playerSelection `andThen` \_ -> Just m
+                            }
+
+                        Err ( s, m ) ->
+                            { game
+                                | fighter = m
+                                , playerSelection = Nothing
+                            }
             in
-                ( { game
-                    | fighter = moveFighter
-                    , playerSelection = game.playerSelection `andThen` \_ -> Just moveFighter
-                  }
-                , Cmd.none
-                )
+                ( updateGame, Cmd.none )
 
         Hover { x, y } ->
             case game.playerSelection of
