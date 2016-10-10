@@ -97,6 +97,7 @@ type alias Model =
     , pinned : Bool
     , injury : Maybe Injury
     , remainingMove : Float
+    , selected : Bool
     , id : Id
     }
 
@@ -123,6 +124,7 @@ averageFighter pos =
     , pinned = False
     , injury = Nothing
     , remainingMove = (toFloat averageFighterProfile.move)
+    , selected = False
     , id = 1
     }
 
@@ -173,7 +175,7 @@ view model msg =
         [ fontSize "1"
         , fontFamily "monospace"
         , textAnchor "middle"
-        , fill "black"
+        , fill (if model.selected then "white" else "black")
         , x
             (model.position |> posX |> toString)
         , y

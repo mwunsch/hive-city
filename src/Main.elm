@@ -69,8 +69,17 @@ type Msg
 update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
-        Select fighter ->
-            ( { game | playerSelection = Just fighter }, Cmd.none )
+        Select model ->
+            let
+                update =
+                    { model | selected = True }
+            in
+                ( { game
+                    | fighter = update
+                    , playerSelection = Just update
+                  }
+                , Cmd.none
+                )
 
         Click { x, y } ->
             let
@@ -150,14 +159,6 @@ view game =
     let
         fighter =
             Model.view game.fighter <| Select game.fighter
-
-        color =
-            case game.playerSelection of
-                Nothing ->
-                    "black"
-
-                Just x ->
-                    "white"
 
         movementArea =
             case game.playerSelection of
