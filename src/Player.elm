@@ -14,11 +14,11 @@ type alias Player =
     }
 
 
-init : Player
-init =
-    { gang = Dict.singleton 1 <| Model.averageFighter ( 50, 25 )
+init : Tabletop -> Player
+init table =
+    { gang = Dict.singleton 1 <| Model.averageFighter (Tabletop.center table)
     , selection = Nothing
-    , movementIntention = ( 50, 25 )
+    , movementIntention = Tabletop.center table
     }
 
 

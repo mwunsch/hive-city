@@ -172,7 +172,7 @@ type Injury
 view : Model -> msg -> Svg msg
 view model msg =
     text'
-        [ fontSize "1"
+        [ fontSize "0.985"
         , fontFamily "monospace"
         , textAnchor "middle"
         , fill <| if model.selected then "white" else "black"
@@ -210,8 +210,8 @@ movementView model pos =
                 , y1 (modelY |> toString)
                 , x2 (maxX |> toString)
                 , y2 (maxY |> toString)
-                , stroke "white"
-                , strokeWidth "0.25"
+                , stroke "yellow"
+                , strokeWidth "0.63"
                 ]
                 []
             , line
@@ -220,7 +220,7 @@ movementView model pos =
                 , x2 (newX |> toString)
                 , y2 (newY |> toString)
                 , stroke "grey"
-                , strokeWidth "0.25"
+                , strokeWidth "0.63"
                 ]
                 []
             ]

@@ -3,17 +3,18 @@ module Tabletop exposing (..)
 import Svg exposing (rect, Svg)
 import Svg.Attributes exposing (..)
 
-
 {-| The Tabletop module exposes types and functions related to the
 structure of the game board as well as positioning and movement on the
 board.
 
 -}
 type alias Tabletop =
-    { width : Int
-    , height : Int
+    { width : Inch
+    , height : Inch
     }
 
+type alias Inch =
+    Int
 
 type alias Position =
     ( Float, Float )
@@ -45,8 +46,9 @@ positionFromMouseCoords ( x, y ) scale =
         ( x', y' )
 
 
-type alias Inch =
-    Int
+center : Tabletop -> Position
+center table =
+    ( toFloat table.width / 2 , toFloat table.height / 2 )
 
 
 distance : Position -> Position -> Float

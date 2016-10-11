@@ -44,13 +44,17 @@ type alias GameState =
 
 init : ( GameState, Cmd Msg )
 init =
-    ( { player = Player.init
-      , tabletop = Tabletop 100 50
-      , windowWidth = 1000
-      , windowScale = 10
-      }
-    , Task.perform (\_ -> NoOp) Resize Window.width
-    )
+    let
+        table =
+            Tabletop 72 48
+    in
+        ( { player = Player.init table
+          , tabletop = table
+          , windowWidth = 1000
+          , windowScale = 10
+          }
+        , Task.perform (\_ -> NoOp) Resize Window.width
+        )
 
 
 
