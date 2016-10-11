@@ -92,6 +92,6 @@ view tabletop children =
     rect
         [ width (tabletop.width |> toString)
         , height (tabletop.height |> toString)
-        , fill "red"
+        , fill "silver"
         ]
         children
