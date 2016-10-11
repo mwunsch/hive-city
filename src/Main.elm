@@ -4,6 +4,7 @@ import Html exposing (Html)
 import Html.App as App
 import Html.Events exposing (on, onClick)
 import Json.Decode as Json exposing ((:=))
+import Keyboard
 import List exposing (map)
 import Maybe exposing (andThen)
 import Model exposing (Model)
@@ -62,6 +63,7 @@ type Msg
     = Select Model
     | Click Mouse.Position
     | Hover Mouse.Position
+    | KeyPress Keyboard.KeyCode
     | Resize Int
     | NoOp
 
@@ -120,6 +122,15 @@ update msg game =
                 Nothing ->
                     ( game, Cmd.none )
 
+        KeyPress key ->
+            case key of
+                -- ESCAPE
+                27 ->
+                    ( { game | playerSelection = Nothing }, Cmd.none )
+
+                _ ->
+                    ( game, Cmd.none )
+
         Resize w ->
             ( { game
                 | windowWidth = w
@@ -139,8 +150,19 @@ update msg game =
 subscriptions : GameState -> Sub Msg
 subscriptions game =
     Sub.batch
-        [ Mouse.moves Hover
-        , Window.resizes (\size -> Resize size.width)
+        [ Window.resizes (\size -> Resize size.width)
+        , case game.playerSelection of
+            Just _ ->
+                Mouse.moves Hover
+
+            Nothing ->
+                Sub.none
+        , case game.playerSelection of
+            Just _ ->
+                Keyboard.presses KeyPress
+
+            Nothing ->
+                Sub.none
         ]
 
 

@@ -175,7 +175,7 @@ view model msg =
         [ fontSize "1"
         , fontFamily "monospace"
         , textAnchor "middle"
-        , fill (if model.selected then "white" else "black")
+        , fill <| if model.selected then "white" else "black"
         , x
             (model.position |> posX |> toString)
         , y
