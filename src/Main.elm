@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Dict
 import Html exposing (Html)
 import Html.App as App
 import Html.Events exposing (on, onClick)
@@ -9,6 +10,7 @@ import List exposing (map)
 import Maybe exposing (andThen)
 import Model exposing (Model)
 import Mouse
+import Player exposing (Player)
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -32,24 +34,19 @@ main =
 
 
 type alias GameState =
-    { fighter : Model
-    , playerSelection : Maybe Model
+    { player : Player
     , tabletop : Tabletop
     , windowWidth : Int
     , windowScale : Float
-    , movementIntention : Tabletop.Position
     }
 
 
 init : ( GameState, Cmd Msg )
 init =
-    ( { fighter =
-            Model.averageFighter ( 50, 25 )
-      , playerSelection = Nothing
+    ( { player = Player.init
       , tabletop = Tabletop 100 50
       , windowWidth = 1000
       , windowScale = 10
-      , movementIntention = ( 50, 25 )
       }
     , Task.perform (\_ -> NoOp) Resize Window.width
     )
@@ -73,60 +70,53 @@ update msg game =
     case msg of
         Select model ->
             let
-                update =
-                    { model | selected = True }
+                p =
+                    Player.selectModel game.player model.id
             in
-                ( { game
-                    | fighter = update
-                    , playerSelection = Just update
-                  }
-                , Cmd.none
-                )
+                ( { game | player = p }, Cmd.none )
 
         Click { x, y } ->
-            let
-                moveFighter : Result Model.MovementError Model
-                moveFighter =
-                    case game.playerSelection of
-                        Just fighter ->
-                            Model.attemptMove fighter <| positionFromMouseCoords ( x, y ) game.windowScale
+            case game.player.selection of
+                Just id ->
+                    let
+                        attemptMove : Model -> Maybe Model
+                        attemptMove model =
+                            case
+                                positionFromMouseCoords ( x, y ) game.windowScale
+                                    |> Model.attemptMove model
+                            of
+                                Ok m ->
+                                    Just m
 
-                        Nothing ->
-                            Ok game.fighter
-
-                updateGame =
-                    case moveFighter of
-                        Ok m ->
-                            { game
-                                | fighter = m
-                                , playerSelection = game.playerSelection `andThen` \_ -> Just m
-                            }
-
-                        Err ( s, m ) ->
-                            { game
-                                | fighter = m
-                                , playerSelection = Nothing
-                            }
-            in
-                ( updateGame, Cmd.none )
-
-        Hover { x, y } ->
-            case game.playerSelection of
-                Just fighter ->
-                    ( { game
-                        | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale
-                      }
-                    , Cmd.none
-                    )
+                                Err ( s, m ) ->
+                                    Just m
+                    in
+                        ( { game
+                            | player =
+                                Player.updateGang game.player id (\m -> m `andThen` attemptMove)
+                          }
+                        , Cmd.none
+                        )
 
                 Nothing ->
                     ( game, Cmd.none )
+
+        Hover { x, y } ->
+            let
+                updatePlayer player =
+                    { player | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale }
+            in
+                ( { game | player = updatePlayer game.player }, Cmd.none )
 
         KeyPress key ->
             case key of
                 -- ESCAPE
                 27 ->
-                    ( { game | playerSelection = Nothing }, Cmd.none )
+                    let
+                        p =
+                            Player.deselectAll game.player
+                    in
+                        ( { game | player = p }, Cmd.none )
 
                 _ ->
                     ( game, Cmd.none )
@@ -151,13 +141,8 @@ subscriptions : GameState -> Sub Msg
 subscriptions game =
     Sub.batch
         [ Window.resizes (\size -> Resize size.width)
-        , case game.playerSelection of
-            Just _ ->
-                Mouse.moves Hover
-
-            Nothing ->
-                Sub.none
-        , case game.playerSelection of
+        , Mouse.moves Hover
+        , case game.player.selection of
             Just _ ->
                 Keyboard.presses KeyPress
 
@@ -179,18 +164,19 @@ onClickWithCoords message =
 view : GameState -> Html Msg
 view game =
     let
-        fighter =
-            Model.view game.fighter <| Select game.fighter
+        fightersView =
+            Dict.values game.player.gang
+                |> map (\f -> Model.view f <| Select f)
 
         movementArea =
-            case game.playerSelection of
-                Nothing ->
-                    [ fighter ]
+            case game.player.selection of
+                Just id ->
+                    Player.getGangMember game.player id
+                        |> Maybe.map (\f -> Model.movementView f game.player.movementIntention :: [])
+                        |> Maybe.withDefault []
 
-                Just x ->
-                    [ fighter
-                    , Model.movementView x game.movementIntention
-                    ]
+                Nothing ->
+                    []
     in
         svg
             [ viewBox
@@ -199,4 +185,7 @@ view game =
                 (game.windowWidth |> toString)
             , onClickWithCoords Click
             ]
-            (Tabletop.view game.tabletop [] :: movementArea)
+            (Tabletop.view game.tabletop []
+                :: movementArea
+                ++ fightersView
+            )
