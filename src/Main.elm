@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Dict
+import Gang
 import Html exposing (Html)
 import Html.App as App
 import Html.Events exposing (on, onClick)
@@ -76,8 +77,8 @@ update msg game =
                 ( { game | player = p }, Cmd.none )
 
         Click { x, y } ->
-            case game.player.selection of
-                Just id ->
+            case Player.getSelectedGangMember game.player of
+                Just fighter ->
                     let
                         attemptMove : Model -> Maybe Model
                         attemptMove model =
@@ -93,7 +94,7 @@ update msg game =
                     in
                         ( { game
                             | player =
-                                Player.updateGang game.player id (\m -> m `andThen` attemptMove)
+                                Player.updateGangMember game.player fighter.id (\m -> m `andThen` attemptMove)
                           }
                         , Cmd.none
                         )
@@ -164,19 +165,10 @@ onClickWithCoords message =
 view : GameState -> Html Msg
 view game =
     let
-        fightersView =
-            Dict.values game.player.gang
-                |> map (\f -> Model.view f <| Select f)
-
         movementArea =
-            case game.player.selection of
-                Just id ->
-                    Player.getGangMember game.player id
-                        |> Maybe.map (\f -> Model.movementView f game.player.movementIntention :: [])
-                        |> Maybe.withDefault []
-
-                Nothing ->
-                    []
+            Player.getSelectedGangMember game.player
+                |> Maybe.map (\fighter -> Model.movementView fighter game.player.movementIntention :: [])
+                |> Maybe.withDefault []
     in
         svg
             [ viewBox
@@ -187,5 +179,5 @@ view game =
             ]
             (Tabletop.view game.tabletop []
                 :: movementArea
-                ++ fightersView
+                ++ Gang.view game.player.gang Select
             )

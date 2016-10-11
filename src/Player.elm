@@ -26,7 +26,7 @@ selectModel : Player -> Model.Id -> Player
 selectModel player id =
     let
         updatedPlayer =
-            updateGang player id <| Maybe.map (\f -> { f | selected = True })
+            updateGangMember player id <| Maybe.map (\f -> { f | selected = True })
     in
         { updatedPlayer | selection = Just id }
 
@@ -48,6 +48,11 @@ getGangMember player id =
     Dict.get id player.gang
 
 
-updateGang : Player -> Model.Id -> (Maybe Model -> Maybe Model) -> Player
-updateGang player id f =
+updateGangMember : Player -> Model.Id -> (Maybe Model -> Maybe Model) -> Player
+updateGangMember player id f =
     { player | gang = player.gang |> Dict.update id f }
+
+
+getSelectedGangMember : Player -> Maybe Model
+getSelectedGangMember player =
+    player.selection `andThen` (\id -> getGangMember player id)
