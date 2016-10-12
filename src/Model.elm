@@ -33,6 +33,7 @@ type alias Model =
     , selected : Bool
     , id : Id
     , fighterType : FighterType
+    , name : String
     }
 
 
@@ -142,6 +143,7 @@ averageFighter pos =
     , selected = False
     , id = 1
     , fighterType = Ganger
+    , name = "Mac McMadd"
     }
 
 
@@ -217,9 +219,9 @@ viewProfile model =
             []
             [ colgroup [] [ col [] [] ]
             , tr [] <|
-                td [] [ Html.text "Fighter Name" ]
+                th [] [ Html.text (model.fighterType |> toString) ]
                     :: List.map (Html.text >> List.repeat 1 >> th []) columns
             , tr [] <|
-                td [] [ Html.text (model.fighterType |> toString) ]
+                td [] [ Html.text model.name ]
                     :: List.map (toString >> Html.text >> List.repeat 1 >> td []) values
             ]
