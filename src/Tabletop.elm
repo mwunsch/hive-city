@@ -10,13 +10,13 @@ board.
 
 -}
 type alias Tabletop =
-    { width : Inch
-    , height : Inch
+    { width : Int
+    , height : Int
     }
 
 
 type alias Inch =
-    Int
+    Float
 
 
 type alias Position =

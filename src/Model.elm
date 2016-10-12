@@ -20,7 +20,7 @@ import Html exposing (Html, table, th, td, tr, colgroup, col)
 import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (Position, Inch, posX, posY)
+import Tabletop exposing (Position, Inch, Distance, posX, posY)
 
 
 type alias Model =
@@ -29,7 +29,7 @@ type alias Model =
     , hidden : Bool
     , pinned : Bool
     , injury : Maybe Injury
-    , remainingMove : Float
+    , remainingMove : Distance
     , selected : Bool
     , id : Id
     , fighterType : FighterType
@@ -138,7 +138,7 @@ averageFighter pos =
     , hidden = False
     , pinned = False
     , injury = Nothing
-    , remainingMove = (toFloat averageFighterProfile.move)
+    , remainingMove = averageFighterProfile.move
     , selected = False
     , id = 1
     , fighterType = Ganger
@@ -204,7 +204,7 @@ viewProfile model =
     let
         ( columns, values ) =
             List.unzip
-                [ ( "M", model.profile.move )
+                [ ( "M", round model.profile.move )
                 , ( "WS", model.profile.weaponSkill )
                 , ( "BS", model.profile.ballisticSkill )
                 , ( "S", model.profile.strength )
