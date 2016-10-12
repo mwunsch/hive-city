@@ -52,7 +52,7 @@ init =
           , windowWidth = 1000
           , windowScale = 10
           }
-        , Task.perform (\_ -> NoOp) Resize Window.width
+        , Task.perform (always NoOp) Resize Window.width
         )
 
 
@@ -73,11 +73,7 @@ update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
         Select model ->
-            let
-                p =
-                    Player.selectModel game.player model.id
-            in
-                ( { game | player = p }, Cmd.none )
+            ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
 
         Click { x, y } ->
             case Player.getSelectedGangMember game.player of
@@ -116,11 +112,7 @@ update msg game =
             case key of
                 -- ESCAPE
                 27 ->
-                    let
-                        p =
-                            Player.deselectAll game.player
-                    in
-                        ( { game | player = p }, Cmd.none )
+                    ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
                 _ ->
                     ( game, Cmd.none )
@@ -146,12 +138,7 @@ subscriptions game =
     Sub.batch
         [ Window.resizes (\size -> Resize size.width)
         , Mouse.moves Hover
-        , case game.player.selection of
-            Just _ ->
-                Keyboard.presses KeyPress
-
-            Nothing ->
-                Sub.none
+        , Keyboard.presses KeyPress
         ]
 
 
