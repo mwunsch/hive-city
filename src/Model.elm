@@ -177,11 +177,10 @@ attemptMove model pos =
                 )
 
 
-
 view : Model -> msg -> Svg msg
 view model msg =
     text'
-        [ fontSize "0.985"
+        [ fontSize (Tabletop.millimeter 25 |> toString)
         , fontFamily "monospace"
         , textAnchor "middle"
         , fill <|
@@ -213,7 +212,6 @@ viewProfile model =
                 , ( "A", model.profile.attacks )
                 , ( "Ld", model.profile.leadership )
                 ]
-
     in
         table
             []

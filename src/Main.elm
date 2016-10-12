@@ -45,7 +45,7 @@ init : ( GameState, Cmd Msg )
 init =
     let
         table =
-            Tabletop 72 48
+            6 `Tabletop.by` 4
     in
         ( { player = Player.init table
           , tabletop = table

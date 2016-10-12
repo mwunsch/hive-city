@@ -37,6 +37,21 @@ posY ( _, y' ) =
     y'
 
 
+foot : Float -> Inch
+foot =
+    (*) 12
+
+
+millimeter : Float -> Inch
+millimeter =
+    (*) 0.0393701
+
+
+by : Float -> Float -> Tabletop
+by w h =
+    Tabletop (round <| foot w) (round <| foot h)
+
+
 positionFromMouseCoords : ( Int, Int ) -> Float -> Position
 positionFromMouseCoords ( x, y ) scale =
     let
@@ -125,7 +140,7 @@ viewMeasuringTape start end range =
                 , x2 (rangeX |> toString)
                 , y2 (rangeY |> toString)
                 , stroke "yellow"
-                , strokeWidth "0.63"
+                , strokeWidth (millimeter 16 |> toString)
                 ]
                 []
             , line
@@ -134,7 +149,7 @@ viewMeasuringTape start end range =
                 , x2 (end |> posX |> toString)
                 , y2 (end |> posY |> toString)
                 , stroke "grey"
-                , strokeWidth "0.63"
+                , strokeWidth (millimeter 16 |> toString)
                 ]
                 []
             ]
