@@ -159,15 +159,23 @@ view game =
             Player.getSelectedGangMember game.player
                 |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove :: [])
                 |> Maybe.withDefault []
+
+        selectedFighterProfile =
+            Player.getSelectedGangMember game.player
+                |> Maybe.map Model.viewProfile
+                |> Maybe.withDefault (Html.table [] [])
     in
-        svg
-            [ viewBox
-                ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
-            , width
-                (game.windowWidth |> toString)
-            , onClickWithCoords Click
+        Html.div []
+            [ svg
+                [ viewBox
+                    ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
+                , width
+                    (game.windowWidth |> toString)
+                , onClickWithCoords Click
+                ]
+                (Tabletop.view game.tabletop
+                    :: measuringTape
+                    ++ Gang.view game.player.gang Select
+                )
+            , selectedFighterProfile
             ]
-            (Tabletop.view game.tabletop
-                :: measuringTape
-                ++ Gang.view game.player.gang Select
-            )

@@ -217,7 +217,9 @@ viewProfile model =
             []
             [ colgroup [] [ col [] [] ]
             , tr [] <|
-                List.map (toString >> Html.text >> List.repeat 1 >> th []) columns
+                td [] [ Html.text "Fighter Name" ]
+                    :: List.map (Html.text >> List.repeat 1 >> th []) columns
             , tr [] <|
-                List.map (toString >> Html.text >> List.repeat 1 >> td []) values
+                td [] [ Html.text (model.fighterType |> toString) ]
+                    :: List.map (toString >> Html.text >> List.repeat 1 >> td []) values
             ]
