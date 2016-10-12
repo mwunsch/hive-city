@@ -16,10 +16,41 @@ From the rulebook:
 
 -}
 
+import Html exposing (Html, table, th, td, tr, colgroup, col)
 import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
+
+
+type alias Model =
+    { profile : Characteristics
+    , position : Position
+    , hidden : Bool
+    , pinned : Bool
+    , injury : Maybe Injury
+    , remainingMove : Float
+    , selected : Bool
+    , id : Id
+    , fighterType : FighterType
+    }
+
+
+type alias Id =
+    Int
+
+
+type Injury
+    = FleshWound
+    | Down
+    | OutOfAction
+
+
+type FighterType
+    = Leader
+    | Ganger
+    | Heavy
+    | Juve
 
 
 {-| From the rulebook:
@@ -86,22 +117,6 @@ type alias Characteristics =
     }
 
 
-type alias Id =
-    Int
-
-
-type alias Model =
-    { profile : Characteristics
-    , position : Position
-    , hidden : Bool
-    , pinned : Bool
-    , injury : Maybe Injury
-    , remainingMove : Float
-    , selected : Bool
-    , id : Id
-    }
-
-
 averageFighterProfile : Characteristics
 averageFighterProfile =
     { move = 4
@@ -126,6 +141,7 @@ averageFighter pos =
     , remainingMove = (toFloat averageFighterProfile.move)
     , selected = False
     , id = 1
+    , fighterType = Ganger
     }
 
 
@@ -168,7 +184,11 @@ view model msg =
         [ fontSize "0.985"
         , fontFamily "monospace"
         , textAnchor "middle"
-        , fill <| if model.selected then "white" else "black"
+        , fill <|
+            if model.selected then
+                "white"
+            else
+                "black"
         , x
             (model.position |> posX |> toString)
         , y
@@ -179,41 +199,27 @@ view model msg =
         [ text "@" ]
 
 
-movementView : Model -> Position -> Svg msg
-movementView model pos =
+viewProfile : Model -> Html msg
+viewProfile model =
     let
-        ( modelX, modelY ) =
-            model.position
+        ( columns, values ) =
+            List.unzip
+                [ ( "M", model.profile.move )
+                , ( "WS", model.profile.weaponSkill )
+                , ( "BS", model.profile.ballisticSkill )
+                , ( "S", model.profile.strength )
+                , ( "T", model.profile.toughness )
+                , ( "W", model.profile.wounds )
+                , ( "A", model.profile.attacks )
+                , ( "Ld", model.profile.leadership )
+                ]
 
-        ( newX, newY ) =
-            pos
-
-        distance =
-            Tabletop.distance model.position pos
-
-        ( maxX, maxY ) =
-            if distance > model.remainingMove then
-                maxAllowedMovement model pos
-            else
-                pos
     in
-        g []
-            [ line
-                [ x1 (modelX |> toString)
-                , y1 (modelY |> toString)
-                , x2 (maxX |> toString)
-                , y2 (maxY |> toString)
-                , stroke "yellow"
-                , strokeWidth "0.63"
-                ]
-                []
-            , line
-                [ x1 (maxX |> toString)
-                , y1 (maxY |> toString)
-                , x2 (newX |> toString)
-                , y2 (newY |> toString)
-                , stroke "grey"
-                , strokeWidth "0.63"
-                ]
-                []
+        table
+            []
+            [ colgroup [] [ col [] [] ]
+            , tr [] <|
+                List.map (toString >> Html.text >> List.repeat 1 >> th []) columns
+            , tr [] <|
+                List.map (toString >> Html.text >> List.repeat 1 >> td []) values
             ]
