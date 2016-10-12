@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Dict
 import Gang
 import Html exposing (Html)
 import Html.App as App
@@ -15,7 +14,7 @@ import Player exposing (Player)
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (posX, posY, Tabletop, positionFromMouseCoords)
+import Tabletop exposing (Tabletop, positionFromMouseCoords)
 import Task
 import Window
 
@@ -169,9 +168,9 @@ onClickWithCoords message =
 view : GameState -> Html Msg
 view game =
     let
-        movementArea =
+        measuringTape =
             Player.getSelectedGangMember game.player
-                |> Maybe.map (\fighter -> Model.movementView fighter game.player.movementIntention :: [])
+                |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove :: [])
                 |> Maybe.withDefault []
     in
         svg
@@ -181,7 +180,7 @@ view game =
                 (game.windowWidth |> toString)
             , onClickWithCoords Click
             ]
-            (Tabletop.view game.tabletop []
-                :: movementArea
+            (Tabletop.view game.tabletop
+                :: measuringTape
                 ++ Gang.view game.player.gang Select
             )

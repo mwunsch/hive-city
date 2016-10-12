@@ -141,8 +141,11 @@ attemptMove model pos =
 
         allowableDistance =
             model.remainingMove - distance
+
+        maxPosition =
+            Tabletop.positionFromDirection model.position pos model.remainingMove
     in
-        if allowableDistance >= 0 then
+        if allowableDistance > 0 then
             Ok
                 { model
                     | position = pos
@@ -152,21 +155,11 @@ attemptMove model pos =
             Err
                 ( "Can't move there"
                 , { model
-                    | position = maxAllowedMovement model pos
+                    | position = maxPosition
                     , remainingMove = 0
                   }
                 )
 
-
-maxAllowedMovement : Model -> Position -> Position
-maxAllowedMovement model intent =
-    Tabletop.positionFromDirection model.position intent model.remainingMove
-
-
-type Injury
-    = FleshWound
-    | Down
-    | OutOfAction
 
 
 view : Model -> msg -> Svg msg

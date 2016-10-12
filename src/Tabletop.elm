@@ -1,7 +1,8 @@
 module Tabletop exposing (..)
 
-import Svg exposing (rect, Svg)
+import Svg exposing (Svg, rect, g, line)
 import Svg.Attributes exposing (..)
+
 
 {-| The Tabletop module exposes types and functions related to the
 structure of the game board as well as positioning and movement on the
@@ -13,11 +14,17 @@ type alias Tabletop =
     , height : Inch
     }
 
+
 type alias Inch =
     Int
 
+
 type alias Position =
     ( Float, Float )
+
+
+type alias Distance =
+    Float
 
 
 posX : Position -> Float
@@ -48,10 +55,10 @@ positionFromMouseCoords ( x, y ) scale =
 
 center : Tabletop -> Position
 center table =
-    ( toFloat table.width / 2 , toFloat table.height / 2 )
+    ( toFloat table.width / 2, toFloat table.height / 2 )
 
 
-distance : Position -> Position -> Float
+distance : Position -> Position -> Distance
 distance ( x1, y1 ) ( x2, y2 ) =
     let
         y' =
@@ -60,10 +67,10 @@ distance ( x1, y1 ) ( x2, y2 ) =
         x' =
             (x1 - x2) ^ 2
     in
-        (x' + y') |> sqrt
+        sqrt (x' + y')
 
 
-positionFromDirection : Position -> Position -> Float -> Position
+positionFromDirection : Position -> Position -> Distance -> Position
 positionFromDirection start end len =
     let
         h =
@@ -76,7 +83,7 @@ positionFromDirection start end len =
             (posY end) - (posY start)
 
         angle =
-            acos <| y' / h
+            acos (y' / h)
 
         co =
             if x' > 0 then
@@ -89,11 +96,45 @@ positionFromDirection start end len =
         )
 
 
-view : Tabletop -> List (Svg msg) -> Svg msg
-view tabletop children =
+view : Tabletop -> Svg msg
+view tabletop =
     rect
         [ width (tabletop.width |> toString)
         , height (tabletop.height |> toString)
         , fill "silver"
         ]
-        children
+        []
+
+
+viewMeasuringTape : Position -> Position -> Distance -> Svg msg
+viewMeasuringTape start end range =
+    let
+        length =
+            distance start end
+
+        ( rangeX, rangeY ) =
+            if length > range then
+                positionFromDirection start end range
+            else
+                end
+    in
+        g []
+            [ line
+                [ x1 (start |> posX |> toString)
+                , y1 (start |> posY |> toString)
+                , x2 (rangeX |> toString)
+                , y2 (rangeY |> toString)
+                , stroke "yellow"
+                , strokeWidth "0.63"
+                ]
+                []
+            , line
+                [ x1 (rangeX |> toString)
+                , y1 (rangeY |> toString)
+                , x2 (end |> posX |> toString)
+                , y2 (end |> posY |> toString)
+                , stroke "grey"
+                , strokeWidth "0.63"
+                ]
+                []
+            ]
