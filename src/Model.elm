@@ -18,6 +18,7 @@ From the rulebook:
 
 import Html exposing (Html, table, th, td, tr, colgroup, col)
 import Html.Events exposing (onClick)
+import Random exposing (Generator)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, Distance, posX, posY)
@@ -132,10 +133,10 @@ averageFighterProfile =
     }
 
 
-averageFighter : Position -> Model
-averageFighter pos =
+init : Model
+init =
     { profile = averageFighterProfile
-    , position = pos
+    , position = Tabletop.offTable
     , hidden = False
     , pinned = False
     , injury = Nothing
@@ -145,6 +146,11 @@ averageFighter pos =
     , fighterType = Ganger
     , name = "Mac McMadd"
     }
+
+
+generator : Generator Model
+generator =
+    Random.map (\id -> { init | id = id }) (Random.int 1 1000)
 
 
 type alias MovementError =

@@ -1,5 +1,6 @@
 module Tabletop exposing (..)
 
+import Random exposing (Generator)
 import Svg exposing (Svg, rect, g, line)
 import Svg.Attributes exposing (..)
 
@@ -35,6 +36,16 @@ posX ( x', _ ) =
 posY : Position -> Float
 posY ( _, y' ) =
     y'
+
+
+positionGenerator : Tabletop -> Generator Position
+positionGenerator { width, height } =
+    Random.pair (Random.float 0 (toFloat width)) (Random.float 0 (toFloat height))
+
+
+offTable : Position
+offTable =
+    ( -1, -1 )
 
 
 foot : Float -> Inch
