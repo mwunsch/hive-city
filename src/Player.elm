@@ -26,7 +26,7 @@ selectModel : Player -> Model.Id -> Player
 selectModel player id =
     let
         updatedPlayer =
-            updateGangMember player id <| Maybe.map (\f -> { f | selected = True })
+            updateGangMember (deselectAll player) id <| Maybe.map (\f -> { f | selected = True })
     in
         { updatedPlayer | selection = Just id }
 
