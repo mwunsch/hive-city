@@ -34,9 +34,8 @@ positionedGenerator table =
         `andThen`
             \models ->
                 Random.list (List.length models) (Tabletop.positionGenerator table)
-                    |> Random.map (List.map2 (,) models)
-                    |> Random.map (List.map (\( model, pos ) -> { model | position = pos }))
-                    |> Random.map fromList
+                    |> Random.map
+                        (fromList << List.map2 (\model pos -> { model | position = pos }) models)
 
 
 view : Gang -> (Model -> msg) -> List (Svg msg)
