@@ -1,6 +1,5 @@
 module Player exposing (..)
 
-import Dict
 import Gang exposing (Gang)
 import Maybe exposing (andThen)
 import Model exposing (Model)
@@ -24,35 +23,24 @@ init table =
 
 selectModel : Player -> Model.Id -> Player
 selectModel player id =
-    let
-        updatedPlayer =
-            updateGangMember (deselectAll player) id <| Maybe.map (\f -> { f | selected = True })
-    in
-        { updatedPlayer | selection = Just id }
+    { player
+        | gang =
+            .gang (deselectAll player)
+                |> Gang.update id (Maybe.map (\f -> { f | selected = True }))
+        , selection = Just id
+    }
 
 
 deselectAll : Player -> Player
 deselectAll player =
-    let
-        updatedGang =
-            Dict.map (\k v -> { v | selected = False }) player.gang
-    in
-        { player
-            | gang = updatedGang
-            , selection = Nothing
-        }
-
-
-getGangMember : Player -> Model.Id -> Maybe Model
-getGangMember player id =
-    Dict.get id player.gang
-
-
-updateGangMember : Player -> Model.Id -> (Maybe Model -> Maybe Model) -> Player
-updateGangMember player id f =
-    { player | gang = player.gang |> Dict.update id f }
+    { player
+        | gang =
+            player.gang
+                |> Gang.map (\k v -> { v | selected = False })
+        , selection = Nothing
+    }
 
 
 getSelectedGangMember : Player -> Maybe Model
 getSelectedGangMember player =
-    player.selection `andThen` (\id -> getGangMember player id)
+    player.selection `andThen` (flip Gang.get) player.gang

@@ -98,7 +98,8 @@ update msg game =
                     in
                         ( { game
                             | player =
-                                Player.updateGangMember game.player fighter.id (\m -> m `andThen` attemptMove)
+                                game.player
+                                    |> \p -> { p | gang = Gang.update fighter.id ((flip andThen) attemptMove) p.gang }
                           }
                         , Cmd.none
                         )
@@ -107,11 +108,13 @@ update msg game =
                     ( game, Cmd.none )
 
         Hover { x, y } ->
-            let
-                updatePlayer player =
-                    { player | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale }
-            in
-                ( { game | player = updatePlayer game.player }, Cmd.none )
+            ( { game
+                | player =
+                    game.player
+                        |> \p -> { p | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale }
+              }
+            , Cmd.none
+            )
 
         KeyPress key ->
             case key of
@@ -131,11 +134,12 @@ update msg game =
             )
 
         Generate gang ->
-            let
-                updatePlayer player =
-                    { player | gang = gang }
-            in
-                ( { game | player = updatePlayer game.player }, Cmd.none )
+            ( { game
+                | player =
+                    game.player |> \p -> { p | gang = gang }
+              }
+            , Cmd.none
+            )
 
         NoOp ->
             ( game, Cmd.none )

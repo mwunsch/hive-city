@@ -17,6 +17,21 @@ empty =
     Dict.empty
 
 
+update : Id -> (Maybe Model -> Maybe Model) -> Gang -> Gang
+update =
+    Dict.update
+
+
+get : Id -> Gang -> Maybe Model
+get =
+    Dict.get
+
+
+map : (Id -> Model -> Model) -> Gang -> Gang
+map =
+    Dict.map
+
+
 fromList : List Model -> Gang
 fromList =
     Dict.fromList << List.map (\m -> ( m.id, m ))
