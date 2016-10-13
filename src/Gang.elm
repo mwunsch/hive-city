@@ -1,10 +1,11 @@
 module Gang exposing (..)
 
-import Dict exposing (Dict)
+import Dict exposing (Dict, toList)
 import List
 import Model exposing (Model, Id)
-import Random exposing (Generator)
+import Random exposing (Generator, andThen)
 import Svg exposing (Svg)
+import Tabletop exposing (Tabletop)
 
 
 type alias Gang =
@@ -25,6 +26,17 @@ generator : Generator Gang
 generator =
     Random.list 5 Model.generator
         |> Random.map fromList
+
+
+positionedGenerator : Tabletop -> Generator Gang
+positionedGenerator table =
+    Random.list 5 Model.generator
+        `andThen`
+            \models ->
+                Random.list (List.length models) (Tabletop.positionGenerator table)
+                    |> Random.map (List.map2 (,) models)
+                    |> Random.map (List.map (\( model, pos ) -> { model | position = pos }))
+                    |> Random.map fromList
 
 
 view : Gang -> (Model -> msg) -> List (Svg msg)

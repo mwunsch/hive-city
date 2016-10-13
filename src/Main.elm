@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Gang
+import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.App as App
 import Html.Events exposing (on, onClick)
@@ -11,6 +11,7 @@ import Maybe exposing (andThen)
 import Model exposing (Model)
 import Mouse
 import Player exposing (Player)
+import Random
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -52,7 +53,10 @@ init =
           , windowWidth = 1000
           , windowScale = 10
           }
-        , Task.perform (always NoOp) Resize Window.width
+        , Cmd.batch
+            [ Task.perform (always NoOp) Resize Window.width
+            , Random.generate Generate (Gang.positionedGenerator table)
+            ]
         )
 
 
@@ -66,6 +70,7 @@ type Msg
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
     | Resize Int
+    | Generate Gang
     | NoOp
 
 
@@ -124,6 +129,13 @@ update msg game =
               }
             , Cmd.none
             )
+
+        Generate gang ->
+            let
+                updatePlayer player =
+                    { player | gang = gang }
+            in
+                ( { game | player = updatePlayer game.player }, Cmd.none )
 
         NoOp ->
             ( game, Cmd.none )
