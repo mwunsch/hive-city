@@ -21,7 +21,7 @@ import Html.Events exposing (onClick)
 import Random exposing (Generator)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (Position, Inch, Distance, posX, posY)
+import Tabletop exposing (Position, Inch, posX, posY)
 import Uuid exposing (Uuid, uuid)
 
 
@@ -31,7 +31,7 @@ type alias Model =
     , hidden : Bool
     , pinned : Bool
     , injury : Maybe Injury
-    , remainingMove : Distance
+    , remainingMove : Inch
     , selected : Bool
     , id : Id
     , fighterType : FighterType

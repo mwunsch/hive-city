@@ -24,9 +24,6 @@ type alias Position =
     ( Float, Float )
 
 
-type alias Distance =
-    Float
-
 
 posX : Position -> Float
 posX ( x', _ ) =
@@ -84,7 +81,7 @@ center table =
     ( toFloat table.width / 2, toFloat table.height / 2 )
 
 
-distance : Position -> Position -> Distance
+distance : Position -> Position -> Inch
 distance ( x1, y1 ) ( x2, y2 ) =
     let
         y' =
@@ -96,7 +93,7 @@ distance ( x1, y1 ) ( x2, y2 ) =
         sqrt (x' + y')
 
 
-positionFromDirection : Position -> Position -> Distance -> Position
+positionFromDirection : Position -> Position -> Inch -> Position
 positionFromDirection start end len =
     let
         h =
@@ -132,7 +129,7 @@ view tabletop =
         []
 
 
-viewMeasuringTape : Position -> Position -> Distance -> Svg msg
+viewMeasuringTape : Position -> Position -> Inch -> Svg msg
 viewMeasuringTape start end range =
     let
         length =
