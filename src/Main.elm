@@ -72,6 +72,7 @@ type Msg
     | Resize Int
     | Generate Gang
     | NoOp
+    | Log String String
 
 
 update : Msg -> GameState -> ( GameState, Cmd Msg )
@@ -143,6 +144,13 @@ update msg game =
 
         NoOp ->
             ( game, Cmd.none )
+
+        Log tag value ->
+            let
+                log =
+                    Debug.log tag value
+            in
+                ( game, Cmd.none )
 
 
 
