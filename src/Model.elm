@@ -22,6 +22,7 @@ import Random exposing (Generator)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, Distance, posX, posY)
+import Uuid exposing (Uuid, uuid)
 
 
 type alias Model =
@@ -39,7 +40,7 @@ type alias Model =
 
 
 type alias Id =
-    Int
+    Uuid
 
 
 type Injury
@@ -142,7 +143,7 @@ init =
     , injury = Nothing
     , remainingMove = averageFighterProfile.move
     , selected = False
-    , id = 1
+    , id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     , fighterType = Ganger
     , name = "Mac McMadd"
     }
@@ -150,7 +151,8 @@ init =
 
 generator : Generator Model
 generator =
-    Random.map (\id -> { init | id = id }) (Random.int 1 1000)
+    uuid
+        |> Random.map (\id -> { init | id = (Debug.log "id" id) })
 
 
 type alias MovementError =
