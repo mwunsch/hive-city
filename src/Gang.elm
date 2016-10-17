@@ -27,6 +27,11 @@ get =
     Dict.get
 
 
+add : Model -> Gang -> Gang
+add model gang =
+    Dict.insert model.id model gang
+
+
 map : (Id -> Model -> Model) -> Gang -> Gang
 map =
     Dict.map

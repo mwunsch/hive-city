@@ -149,6 +149,22 @@ init =
     }
 
 
+cost : Model -> Int
+cost model =
+    case model.fighterType of
+        Leader ->
+            120
+
+        Ganger ->
+            50
+
+        Heavy ->
+            60
+
+        Juve ->
+            25
+
+
 generator : Generator Model
 generator =
     uuid
