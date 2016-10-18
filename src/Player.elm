@@ -11,6 +11,7 @@ type alias Player =
     , selection : Maybe Model.Id
     , movementIntention : Position
     , credits : Int
+    , name : String
     }
 
 
@@ -20,6 +21,7 @@ init table =
     , selection = Nothing
     , movementIntention = Tabletop.center table
     , credits = 1000
+    , name = "Grimm's Reavers"
     }
 
 
