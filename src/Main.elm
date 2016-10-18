@@ -17,6 +17,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Tabletop, positionFromMouseCoords)
 import Task
+import Turn exposing (Turn)
 import Window
 
 
@@ -39,6 +40,7 @@ type alias GameState =
     , tabletop : Tabletop
     , windowWidth : Int
     , windowScale : Float
+    , turn : Turn
     }
 
 
@@ -52,6 +54,7 @@ init =
           , tabletop = table
           , windowWidth = 1000
           , windowScale = 10
+          , turn = Turn.init
           }
         , Cmd.batch
             [ Task.perform (always NoOp) Resize Window.width
@@ -201,5 +204,6 @@ view game =
                     :: measuringTape
                     ++ Gang.view game.player.gang Select
                 )
+            , Html.strong [] [ Html.text (toString game.turn.phase) ]
             , selectedFighterProfile
             ]
