@@ -120,8 +120,8 @@ type alias Characteristics =
     }
 
 
-averageFighterProfile : Characteristics
-averageFighterProfile =
+ganger : Characteristics
+ganger =
     { move = 4
     , weaponSkill = 3
     , ballisticSkill = 3
@@ -134,14 +134,38 @@ averageFighterProfile =
     }
 
 
+leader : Characteristics
+leader =
+    { ganger
+        | weaponSkill = 4
+        , ballisticSkill = 4
+        , initiative = 4
+        , leadership = 8
+    }
+
+
+heavy : Characteristics
+heavy =
+    ganger
+
+
+juve : Characteristics
+juve =
+    { ganger
+        | weaponSkill = 2
+        , ballisticSkill = 2
+        , leadership = 6
+    }
+
+
 init : Model
 init =
-    { profile = averageFighterProfile
+    { profile = ganger
     , position = Tabletop.offTable
     , hidden = False
     , pinned = False
     , injury = Nothing
-    , remainingMove = averageFighterProfile.move
+    , remainingMove = ganger.move
     , selected = False
     , id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     , fighterType = Ganger
