@@ -1,4 +1,4 @@
-module Gang exposing (Gang, init, empty, name, rename, roster, id, recruit, update, fromList, get, map, generator, positionedGenerator, view)
+module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, get, map, generator, positionedGenerator, view)
 
 import Dict exposing (Dict, toList)
 import List
@@ -59,6 +59,11 @@ id (Gang { id }) =
     id
 
 
+stash : Gang -> Int
+stash (Gang { credits }) =
+    credits
+
+
 {-| From the rulebook:
 
 > You have 1000 Guilder credits to spend on recruiting and arming your
@@ -82,7 +87,13 @@ recruit model (Gang params) =
             params.credits - cost
     in
         if remainingCredits >= 0 then
-            Just (Gang { params | roster = (Dict.insert model.id model params.roster) })
+            Just
+                (Gang
+                    { params
+                        | roster = (Dict.insert model.id model params.roster)
+                        , credits = remainingCredits
+                    }
+                )
         else
             Nothing
 
