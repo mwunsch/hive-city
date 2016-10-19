@@ -17,7 +17,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Tabletop, positionFromMouseCoords)
 import Task
-import Turn exposing (Turn)
+import Turn exposing (Turn, Phase(..))
 import Window
 
 
@@ -87,26 +87,31 @@ update msg game =
         Click { x, y } ->
             case Player.getSelectedGangMember game.player of
                 Just fighter ->
-                    let
-                        attemptMove : Model -> Maybe Model
-                        attemptMove model =
-                            case
-                                positionFromMouseCoords ( x, y ) game.windowScale
-                                    |> Model.attemptMove model
-                            of
-                                Ok m ->
-                                    Just m
+                    case Turn.phase game.turn of
+                        Movement ->
+                            let
+                                attemptMove : Model -> Maybe Model
+                                attemptMove model =
+                                    case
+                                        positionFromMouseCoords ( x, y ) game.windowScale
+                                            |> Model.attemptMove model
+                                    of
+                                        Ok m ->
+                                            Just m
 
-                                Err ( s, m ) ->
-                                    Just m
-                    in
-                        ( { game
-                            | player =
-                                game.player
-                                    |> \p -> { p | gang = Gang.update fighter.id ((flip andThen) attemptMove) p.gang }
-                          }
-                        , Cmd.none
-                        )
+                                        Err ( s, m ) ->
+                                            Just m
+                            in
+                                ( { game
+                                    | player =
+                                        game.player
+                                            |> \p -> { p | gang = Gang.update fighter.id ((flip andThen) attemptMove) p.gang }
+                                  }
+                                , Cmd.none
+                                )
+
+                        _ ->
+                            ( game, Cmd.none )
 
                 Nothing ->
                     ( game, Cmd.none )
@@ -204,6 +209,6 @@ view game =
                     :: measuringTape
                     ++ Gang.view game.player.gang Select
                 )
-            , Html.strong [] [ Html.text (toString game.turn.phase) ]
+            , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]
             , selectedFighterProfile
             ]

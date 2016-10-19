@@ -1,4 +1,4 @@
-module Turn exposing (..)
+module Turn exposing (Turn, Phase(..), init, round, advance, phase)
 
 
 type Phase
@@ -8,33 +8,36 @@ type Phase
     | Recovery
 
 
-type alias Turn =
-    { round : Int
-    , phase : Phase
-    }
+type Turn
+    = Turn Int Phase
 
 
 init : Turn
 init =
-    { round = 1
-    , phase = Movement
-    }
+    Turn 1 Movement
+
+
+round : Turn -> Int
+round (Turn num _) =
+    num
+
+
+phase : Turn -> Phase
+phase (Turn _ p) =
+    p
 
 
 advance : Turn -> Turn
-advance turn =
-    case turn.phase of
+advance (Turn round phase) =
+    case phase of
         Movement ->
-            { turn | phase = Shooting }
+            Turn round Shooting
 
         Shooting ->
-            { turn | phase = HandToHand }
+            Turn round HandToHand
 
         HandToHand ->
-            { turn | phase = Recovery }
+            Turn round Recovery
 
         Recovery ->
-            { turn
-                | round = turn.round + 1
-                , phase = Movement
-            }
+            Turn (round + 1) Movement
