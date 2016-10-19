@@ -158,19 +158,34 @@ juve =
     }
 
 
-init : Model
-init =
-    { profile = ganger
-    , position = Tabletop.offTable
-    , hidden = False
-    , pinned = False
-    , injury = Nothing
-    , remainingMove = ganger.move
-    , selected = False
-    , id = Uuid.scheme
-    , fighterType = Ganger
-    , name = "Mac McMadd"
-    }
+init : FighterType -> Model
+init role =
+    let
+        template =
+            case role of
+                Ganger ->
+                    ganger
+
+                Leader ->
+                    leader
+
+                Heavy ->
+                    heavy
+
+                Juve ->
+                    juve
+    in
+        { profile = template
+        , position = Tabletop.offTable
+        , hidden = False
+        , pinned = False
+        , injury = Nothing
+        , remainingMove = template.move
+        , selected = False
+        , id = Uuid.scheme
+        , fighterType = role
+        , name = "Mac McMadd"
+        }
 
 
 cost : Model -> Int
@@ -189,10 +204,14 @@ cost model =
             25
 
 
-generator : Generator Model
-generator =
-    uuid
-        |> Random.map (\id -> { init | id = (Debug.log "id" id) })
+generator : FighterType -> Generator Model
+generator role =
+    let
+        initial =
+            init role
+    in
+        uuid
+            |> Random.map (\id -> { initial | id = (Debug.log "id" id) })
 
 
 type alias MovementError =

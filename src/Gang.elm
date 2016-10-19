@@ -120,12 +120,17 @@ map transform (Gang params) =
 
 generator : Generator Gang
 generator =
-    uuid
+    Model.generator Model.Leader
         `andThen`
-            \id ->
-                Random.list 5 Model.generator
+            (\leader ->
+                Random.list 4 (Model.generator Model.Ganger)
+                    |> Random.map ((::) leader)
                     |> Random.map fromList
-                    |> Random.map (\(Gang params) -> Gang { params | id = id })
+            )
+        `andThen`
+            \(Gang gang) ->
+                uuid
+                    |> Random.map (\id -> Gang { gang | id = id })
 
 
 positionedGenerator : Tabletop -> Generator Gang
