@@ -1,4 +1,4 @@
-module Uuid exposing (Uuid, uuid)
+module Uuid exposing (Uuid, uuid, scheme)
 
 import Random exposing (Generator, andThen)
 import String
@@ -29,6 +29,11 @@ uuid =
             |> List.foldr (Random.map2 (::)) listgen
             |> Random.map (List.map (List.map numToHex >> String.fromList))
             |> Random.map (String.join "-")
+
+
+scheme : Uuid
+scheme =
+    "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
 
 hexTable : Array Char

@@ -167,7 +167,7 @@ init =
     , injury = Nothing
     , remainingMove = ganger.move
     , selected = False
-    , id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    , id = Uuid.scheme
     , fighterType = Ganger
     , name = "Mac McMadd"
     }
