@@ -5,7 +5,7 @@ import List
 import Maybe
 import Model exposing (Model, Id)
 import Random exposing (Generator, andThen)
-import Svg exposing (Svg)
+import Svg exposing (Svg, g)
 import Tabletop exposing (Tabletop)
 import Uuid exposing (Uuid, uuid)
 
@@ -149,7 +149,8 @@ positionedGenerator table =
                         |> Random.map (\fighters -> Gang { gang | roster = fighters })
 
 
-view : Gang -> (Model -> msg) -> List (Svg msg)
+view : Gang -> (Model -> msg) -> Svg msg
 view (Gang { roster }) msg =
     Dict.values roster
         |> List.map (\fighter -> Model.view fighter (msg fighter))
+        |> g []

@@ -19,6 +19,7 @@ From the rulebook:
 import Html exposing (Html, table, th, td, tr, colgroup, col)
 import Html.Events exposing (onClick)
 import Random exposing (Generator)
+import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
@@ -264,7 +265,7 @@ view model msg =
         , onClick msg
         , Svg.Attributes.cursor "pointer"
         ]
-        [ text "@" ]
+        [ text (model.fighterType |> toString |> String.left 1) ]
 
 
 viewProfile : Model -> Html msg

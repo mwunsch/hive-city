@@ -207,7 +207,7 @@ view game =
                 ]
                 (Tabletop.view game.tabletop
                     :: measuringTape
-                    ++ Gang.view game.player.gang Select
+                    ++ [ Gang.view game.player.gang Select ]
                 )
             , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]
             , selectedFighterProfile
