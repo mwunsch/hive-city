@@ -1,5 +1,6 @@
-module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, get, map, generator, positionedGenerator, view)
+module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toArray, get, map, generator, positionedGenerator, view)
 
+import Array exposing (Array)
 import Dict exposing (Dict, toList)
 import List
 import Maybe
@@ -106,6 +107,11 @@ update id transform (Gang params) =
 fromList : List Model -> Gang
 fromList models =
     List.foldl (\model gang -> recruit model gang |> Maybe.withDefault empty) init models
+
+
+toArray : Gang -> Array Model
+toArray (Gang { roster }) =
+    Dict.values roster |> Array.fromList
 
 
 get : Id -> Gang -> Maybe Model

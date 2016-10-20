@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Action exposing (Action)
+import Array
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.App as App
@@ -116,13 +117,39 @@ update msg game =
             )
 
         KeyPress key ->
-            case key of
-                -- ESCAPE
-                27 ->
-                    ( { game | player = Player.deselectAll game.player }, Cmd.none )
+            let
+                lookupFighter : Int -> GameState
+                lookupFighter index =
+                    Gang.toArray game.player.gang
+                        |> Array.get index
+                        |> Maybe.map (\{ id } -> { game | player = Player.selectModel game.player id })
+                        |> Maybe.withDefault game
+            in
+                case key of
+                    27 ->
+                        -- ESCAPE
+                        ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
-                _ ->
-                    ( game, Cmd.none )
+                    49 ->
+                        ( lookupFighter 0, Cmd.none )
+
+                    50 ->
+                        ( lookupFighter 1, Cmd.none )
+
+                    51 ->
+                        ( lookupFighter 2, Cmd.none )
+
+                    52 ->
+                        ( lookupFighter 3, Cmd.none )
+
+                    53 ->
+                        ( lookupFighter 4, Cmd.none )
+
+                    54 ->
+                        ( lookupFighter 5, Cmd.none )
+
+                    _ ->
+                        ( game, Cmd.none )
 
         Resize w ->
             ( { game
