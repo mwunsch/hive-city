@@ -119,6 +119,11 @@ positionFromDirection start end len =
         )
 
 
+isWithinDistance : Inch -> Position -> Position -> Bool
+isWithinDistance r start end =
+    distance start end < r
+
+
 view : Tabletop -> Svg msg
 view tabletop =
     rect

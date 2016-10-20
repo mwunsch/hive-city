@@ -90,31 +90,14 @@ update msg game =
         Click { x, y } ->
             case Player.getSelectedGangMember game.player of
                 Just fighter ->
-                    case Turn.phase game.turn of
-                        Movement ->
-                            let
-                                attemptMove : Model -> Maybe Model
-                                attemptMove model =
-                                    case
-                                        positionFromMouseCoords ( x, y ) game.windowScale
-                                            |> Model.attemptMove model
-                                    of
-                                        Ok m ->
-                                            Just m
-
-                                        Err ( s, m ) ->
-                                            Just m
-                            in
-                                ( { game
-                                    | player =
-                                        game.player
-                                            |> \p -> { p | gang = Gang.update fighter.id ((flip andThen) attemptMove) p.gang }
-                                  }
-                                , Cmd.none
-                                )
-
-                        _ ->
+                    let
+                        pos =
+                            positionFromMouseCoords ( x, y ) game.windowScale
+                    in
+                        if Tabletop.isWithinDistance 2 fighter.position pos then
                             ( game, Cmd.none )
+                        else
+                            ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
                 Nothing ->
                     ( game, Cmd.none )
@@ -216,6 +199,7 @@ view game =
                     ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
                 , width
                     (game.windowWidth |> toString)
+                , onClickWithCoords Click
                 ]
                 [ definitions
                 , Tabletop.view game.tabletop
