@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Action exposing (Action)
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.App as App
@@ -70,6 +71,8 @@ init =
 type Msg
     = Select Model
     | Click Mouse.Position
+    | Command Model Action
+      -- idea here is to command a model to perform a certain action
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
     | Resize Int
@@ -115,6 +118,10 @@ update msg game =
 
                 Nothing ->
                     ( game, Cmd.none )
+
+        Command _ _ ->
+            -- TODO
+            ( game, Cmd.none )
 
         Hover { x, y } ->
             ( { game
@@ -192,10 +199,18 @@ view game =
                 |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove)
                 |> Maybe.withDefault (g [] [])
 
+        actionSelection =
+            Player.getSelectedGangMember game.player
+                |> Maybe.map (\fighter -> Action.viewSelection (Turn.phase game.turn) fighter)
+                |> Maybe.withDefault (g [] [])
+
         selectedFighterProfile =
             Player.getSelectedGangMember game.player
                 |> Maybe.map Model.viewProfile
                 |> Maybe.withDefault (Html.table [] [])
+
+        definitions =
+            defs [] []
     in
         Html.div []
             [ svg
@@ -203,10 +218,10 @@ view game =
                     ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
                 , width
                     (game.windowWidth |> toString)
-                , onClickWithCoords Click
                 ]
-                [ Tabletop.view game.tabletop
-                , measuringTape
+                [ definitions
+                , Tabletop.view game.tabletop
+                , actionSelection
                 , Gang.view game.player.gang Select
                 ]
             , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]

@@ -253,6 +253,7 @@ view model msg =
         [ fontSize (Tabletop.millimeter 25 |> toString)
         , fontFamily "monospace"
         , textAnchor "middle"
+        , alignmentBaseline "middle"
         , fill <|
             if model.selected then
                 "white"
