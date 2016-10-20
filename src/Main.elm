@@ -200,9 +200,7 @@ view game =
                 |> Maybe.withDefault (g [] [])
 
         actionSelection =
-            Player.getSelectedGangMember game.player
-                |> Maybe.map (\fighter -> Action.viewSelection (Turn.phase game.turn) fighter)
-                |> Maybe.withDefault (g [] [])
+            Player.view game.player (Turn.phase game.turn)
 
         selectedFighterProfile =
             Player.getSelectedGangMember game.player

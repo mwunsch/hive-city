@@ -1,6 +1,7 @@
 module Tabletop exposing (..)
 
 import Random exposing (Generator)
+import String
 import Svg exposing (Svg, rect, g, line)
 import Svg.Attributes exposing (..)
 
@@ -22,7 +23,6 @@ type alias Inch =
 
 type alias Position =
     ( Float, Float )
-
 
 
 posX : Position -> Float
@@ -161,3 +161,11 @@ viewMeasuringTape start end range =
                 ]
                 []
             ]
+
+
+transformTranslate : Position -> Svg.Attribute msg
+transformTranslate ( x, y ) =
+    List.map toString [ x, y ]
+        |> String.join ","
+        |> (\str -> String.concat [ "translate(", str, ")" ])
+        |> transform

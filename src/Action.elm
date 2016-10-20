@@ -5,12 +5,13 @@ import Model exposing (Model)
 import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (Inch, posX, posY)
+import Tabletop exposing (Inch, posX, posY, transformTranslate)
 import Turn exposing (Turn, Phase(..))
 
 
 type Action
     = Await
+    | Cancel
     | Move
     | Charge
     | Run
@@ -23,16 +24,16 @@ select : Phase -> Model -> List Action
 select phase fighter =
     case phase of
         Movement ->
-            [ Await, Move, Charge, Run, Hide ]
+            [ Move, Charge, Run, Hide, Cancel ]
 
         Shooting ->
-            [ Await, Shoot ]
+            [ Shoot, Cancel ]
 
         HandToHand ->
-            [ Fight ]
+            [ Cancel ]
 
         Recovery ->
-            [ Await ]
+            [ Cancel ]
 
 
 symbol : Action -> String
@@ -48,28 +49,40 @@ symbol action =
             String.fromChar '🔜'
 
 
+view : Action -> Phase -> Model -> Svg msg
+view action phase model =
+    case action of
+        Await ->
+            viewSelection phase model
+
+        _ ->
+            g [ transformTranslate model.position ]
+                [ circle
+                    [ r (Tabletop.millimeter 25 |> toString)
+                    , fill "red"
+                    , opacity "0.15"
+                    ]
+                    []
+                ]
+
+
 {-| TODO: Just drawing a circle for now until can come up with better HUD.
 -}
 viewSelection : Phase -> Model -> Svg msg
 viewSelection phase { position } =
-    let
-        translate : Tabletop.Position -> String
-        translate ( x, y ) =
-            String.concat
-                [ "translate"
-                , "("
-                , (String.join "," [ (toString x), (toString y) ])
-                , ")"
-                ]
-    in
-        g [ transform (translate position) ]
-            [ circle
-                [ r (Tabletop.millimeter 35 |> toString)
-                , fill "white"
-                , opacity "0.15"
-                ]
-                []
+    g [ transformTranslate position ]
+        [ circle
+            [ r (Tabletop.millimeter 35 |> toString)
+            , fill "white"
+            , opacity "0.15"
             ]
+            []
+        ]
+
+
+emptyView : Svg msg
+emptyView =
+    g [] []
 
 
 {-| TODO: Make the below `view` fn better.
