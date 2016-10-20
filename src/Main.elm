@@ -189,8 +189,8 @@ view game =
     let
         measuringTape =
             Player.getSelectedGangMember game.player
-                |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove :: [])
-                |> Maybe.withDefault []
+                |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove)
+                |> Maybe.withDefault (g [] [])
 
         selectedFighterProfile =
             Player.getSelectedGangMember game.player
@@ -205,10 +205,10 @@ view game =
                     (game.windowWidth |> toString)
                 , onClickWithCoords Click
                 ]
-                (Tabletop.view game.tabletop
-                    :: measuringTape
-                    ++ [ Gang.view game.player.gang Select ]
-                )
+                [ Tabletop.view game.tabletop
+                , measuringTape
+                , Gang.view game.player.gang Select
+                ]
             , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]
             , selectedFighterProfile
             ]
