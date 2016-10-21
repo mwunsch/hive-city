@@ -14,6 +14,7 @@ import Model exposing (Model)
 import Mouse
 import Player exposing (Player)
 import Random
+import Result
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -72,7 +73,7 @@ init =
 type Msg
     = Select Model
     | Click Mouse.Position
-    | Command Model Action
+    | Command Action
       -- idea here is to command a model to perform a certain action
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
@@ -95,17 +96,37 @@ update msg game =
                         pos =
                             positionFromMouseCoords ( x, y ) game.windowScale
                     in
-                        if Tabletop.isWithinDistance 2 fighter.position pos then
-                            ( game, Cmd.none )
-                        else
-                            ( { game | player = Player.deselectAll game.player }, Cmd.none )
+                        case game.player.action of
+                            Action.Move ->
+                                let
+                                    move : Model -> Model
+                                    move f =
+                                        case Model.attemptMove f pos of
+                                            Ok model ->
+                                                model
+
+                                            Err ( _, model ) ->
+                                                model
+                                in
+                                    Gang.update fighter.id (Maybe.map move) game.player.gang
+                                        |> (\gang -> { game | player = game.player |> (\p -> { p | gang = gang, action = Action.Await }) })
+                                        |> (flip (,)) Cmd.none
+
+                            _ ->
+                                let
+                                    pos =
+                                        positionFromMouseCoords ( x, y ) game.windowScale
+                                in
+                                    if Tabletop.isWithinDistance 2 fighter.position pos then
+                                        ( game, Cmd.none )
+                                    else
+                                        ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
                 Nothing ->
                     ( game, Cmd.none )
 
-        Command _ _ ->
-            -- TODO
-            ( game, Cmd.none )
+        Command action ->
+            ( { game | player = game.player |> \p -> { p | action = action } }, Cmd.none )
 
         Hover { x, y } ->
             ( { game
@@ -204,13 +225,8 @@ onClickWithCoords message =
 view : GameState -> Html Msg
 view game =
     let
-        measuringTape =
-            Player.getSelectedGangMember game.player
-                |> Maybe.map (\fighter -> Tabletop.viewMeasuringTape fighter.position game.player.movementIntention fighter.remainingMove)
-                |> Maybe.withDefault (g [] [])
-
         actionSelection =
-            Player.view game.player (Turn.phase game.turn)
+            Player.view game.player (Turn.phase game.turn) Command
 
         selectedFighterProfile =
             Player.getSelectedGangMember game.player

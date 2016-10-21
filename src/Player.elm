@@ -33,6 +33,7 @@ selectModel player id =
             .gang (deselectAll player)
                 |> Gang.update id (Maybe.map (\f -> { f | selected = True }))
         , selection = Just id
+        , action = Await
     }
 
 
@@ -51,8 +52,21 @@ getSelectedGangMember player =
     player.selection `andThen` (flip Gang.get) player.gang
 
 
-view : Player -> Phase -> Svg msg
-view player phase =
+view : Player -> Phase -> (Action -> msg) -> Svg msg
+view player phase msg =
     getSelectedGangMember player
-        |> Maybe.map (Action.view player.action phase)
+        |> Maybe.map (actionView player phase msg)
         |> Maybe.withDefault (Action.emptyView)
+
+
+actionView : Player -> Phase -> (Action -> msg) -> Model -> Svg msg
+actionView player phase msg fighter =
+    case player.action of
+        Await ->
+            Action.viewSelection phase fighter msg
+
+        Move ->
+            Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove
+
+        _ ->
+            Action.view player.action phase fighter msg

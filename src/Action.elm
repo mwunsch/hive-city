@@ -1,5 +1,7 @@
 module Action exposing (..)
 
+import Html.Events exposing (onWithOptions)
+import Json.Decode as Json
 import List
 import Model exposing (Model)
 import String
@@ -24,7 +26,8 @@ select : Phase -> Model -> List Action
 select phase fighter =
     case phase of
         Movement ->
-            [ Move, Charge, Run, Hide, Cancel ]
+            -- [ Charge, Run, Hide, Cancel,
+            [ Move ]
 
         Shooting ->
             [ Shoot, Cancel ]
@@ -49,16 +52,20 @@ symbol action =
             String.fromChar '🔜'
 
 
-view : Action -> Phase -> Model -> Svg msg
-view action phase model =
-    case action of
-        Await ->
-            viewSelection phase model
+{-| TODO: Consider moving into a module
+-}
+onClick : msg -> Svg.Attribute msg
+onClick message =
+    onWithOptions "click" { stopPropagation = True, preventDefault = False } (Json.succeed message)
 
+
+view : Action -> Phase -> Model -> (Action -> msg) -> Svg msg
+view action phase model msg =
+    case action of
         _ ->
             g [ transformTranslate model.position ]
                 [ circle
-                    [ r (Tabletop.millimeter 25 |> toString)
+                    [ r (Tabletop.millimeter 20 |> toString)
                     , fill "red"
                     , opacity "0.15"
                     ]
@@ -66,18 +73,40 @@ view action phase model =
                 ]
 
 
+viewControl : Action -> msg -> Svg msg
+viewControl action msg =
+    g
+        [ transform "translate(0,1.15)"
+        , onClick msg
+        , Svg.Attributes.cursor "pointer"
+        ]
+        [ circle
+            [ r (Tabletop.millimeter 12 |> toString)
+            , fill "white"
+            , opacity "0.75"
+            ]
+            []
+        , text'
+            [ fontSize (Tabletop.millimeter 15 |> toString)
+            , textAnchor "middle"
+            , alignmentBaseline "middle"
+            ]
+            [ text (symbol action) ]
+        ]
+
+
 {-| TODO: Just drawing a circle for now until can come up with better HUD.
 -}
-viewSelection : Phase -> Model -> Svg msg
-viewSelection phase { position } =
-    g [ transformTranslate position ]
-        [ circle
-            [ r (Tabletop.millimeter 35 |> toString)
+viewSelection : Phase -> Model -> (Action -> msg) -> Svg msg
+viewSelection phase model msg =
+    g [ transformTranslate model.position ] <|
+        circle
+            [ r "1.25"
             , fill "white"
             , opacity "0.15"
             ]
             []
-        ]
+            :: List.map (\action -> viewControl action (msg action)) (select phase model)
 
 
 emptyView : Svg msg
