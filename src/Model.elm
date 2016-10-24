@@ -17,12 +17,12 @@ From the rulebook:
 -}
 
 import Html exposing (Html, table, th, td, tr, colgroup, col)
-import Html.Events exposing (onClick)
 import Random exposing (Generator)
 import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
+import Utilities exposing (textNode, onClickWithoutPropagation)
 import Uuid exposing (Uuid, uuid)
 
 
@@ -263,7 +263,7 @@ view model msg =
             (model.position |> posX |> toString)
         , y
             (model.position |> posY |> toString)
-        , onClick msg
+        , onClickWithoutPropagation msg
         , Svg.Attributes.cursor "pointer"
         ]
         [ text (model.fighterType |> toString |> String.left 1) ]
@@ -289,8 +289,8 @@ viewProfile model =
             [ colgroup [] [ col [] [] ]
             , tr [] <|
                 th [] [ Html.text (model.fighterType |> toString) ]
-                    :: List.map (Html.text >> List.repeat 1 >> th []) columns
+                    :: List.map (textNode >> th []) columns
             , tr [] <|
                 td [] [ Html.text model.name ]
-                    :: List.map (toString >> Html.text >> List.repeat 1 >> td []) values
+                    :: List.map (toString >> textNode >> td []) values
             ]

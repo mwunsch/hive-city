@@ -5,7 +5,7 @@ import Array
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.App as App
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on)
 import Json.Decode as Json exposing ((:=))
 import Keyboard
 import List exposing (map)

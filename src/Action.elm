@@ -1,7 +1,5 @@
 module Action exposing (..)
 
-import Html.Events exposing (onWithOptions)
-import Json.Decode as Json
 import List
 import Model exposing (Model)
 import String
@@ -9,6 +7,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop exposing (Inch, posX, posY, transformTranslate)
 import Turn exposing (Turn, Phase(..))
+import Utilities exposing (onClickWithoutPropagation, textNode)
 
 
 type Action
@@ -52,13 +51,6 @@ symbol action =
             String.fromChar '🔜'
 
 
-{-| TODO: Consider moving into a module
--}
-onClick : msg -> Svg.Attribute msg
-onClick message =
-    onWithOptions "click" { stopPropagation = True, preventDefault = False } (Json.succeed message)
-
-
 view : Action -> Phase -> Model -> (Action -> msg) -> Svg msg
 view action phase model msg =
     case action of
@@ -77,7 +69,7 @@ viewControl : Action -> msg -> Svg msg
 viewControl action msg =
     g
         [ transform "translate(0,1.15)"
-        , onClick msg
+        , onClickWithoutPropagation msg
         , Svg.Attributes.cursor "pointer"
         ]
         [ circle
@@ -91,7 +83,7 @@ viewControl action msg =
             , textAnchor "middle"
             , alignmentBaseline "middle"
             ]
-            [ text (symbol action) ]
+            (symbol action |> textNode)
         ]
 
 
