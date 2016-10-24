@@ -52,6 +52,35 @@ getSelectedGangMember player =
     player.selection `andThen` (flip Gang.get) player.gang
 
 
+type Instruction
+    = Movement Model Position
+
+
+takeAction : Instruction -> Player -> Player
+takeAction instruction player =
+    case instruction of
+        Movement fighter pos ->
+            let
+                move : Model -> Model
+                move f =
+                    case Model.attemptMove f pos of
+                        Ok model ->
+                            model
+
+                        Err ( _, model ) ->
+                            model
+            in
+                { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
+
+await : Player -> Player
+await player =
+    { player | action = Await }
+
+
+
+-- VIEW
+
+
 view : Player -> Phase -> (Action -> msg) -> Svg msg
 view player phase msg =
     getSelectedGangMember player
@@ -69,4 +98,4 @@ actionView player phase msg fighter =
             Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove
 
         _ ->
-            Action.view player.action phase fighter msg
+            Action.emptyView
