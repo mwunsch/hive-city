@@ -29,7 +29,8 @@ select phase fighter =
             [ Move ]
 
         Shooting ->
-            [ Shoot, Cancel ]
+            -- [ Cancel,
+            [ Shoot ]
 
         HandToHand ->
             [ Cancel ]
@@ -47,22 +48,11 @@ symbol action =
         Run ->
             String.fromChar '🏃'
 
+        Shoot ->
+            String.fromChar '🔫'
+
         _ ->
             String.fromChar '🔜'
-
-
-view : Action -> Phase -> Model -> (Action -> msg) -> Svg msg
-view action phase model msg =
-    case action of
-        _ ->
-            g [ transformTranslate model.position ]
-                [ circle
-                    [ r (Tabletop.millimeter 20 |> toString)
-                    , fill "red"
-                    , opacity "0.15"
-                    ]
-                    []
-                ]
 
 
 viewControl : Action -> msg -> Svg msg
@@ -104,6 +94,18 @@ viewSelection phase model msg =
 emptyView : Svg msg
 emptyView =
     g [] []
+
+
+unimplementedView : Action -> Model -> Svg msg
+unimplementedView action model =
+    g [ transformTranslate model.position ]
+        [ circle
+            [ r (Tabletop.millimeter 20 |> toString)
+            , fill "red"
+            , opacity "0.15"
+            ]
+            []
+        ]
 
 
 {-| TODO: Make the below `view` fn better.

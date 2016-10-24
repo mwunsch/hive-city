@@ -98,4 +98,4 @@ actionView player phase msg fighter =
             Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove
 
         _ ->
-            Action.emptyView
+            Action.unimplementedView player.action fighter
