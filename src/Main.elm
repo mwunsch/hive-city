@@ -14,7 +14,6 @@ import Model exposing (Model)
 import Mouse
 import Player exposing (Player)
 import Random
-import Result
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -74,7 +73,7 @@ type Msg
     = Select Model
     | Click Mouse.Position
     | Command Action
-      -- idea here is to command a model to perform a certain action
+    | Complete Action
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
     | Resize Int
@@ -98,35 +97,37 @@ update msg game =
                     in
                         case game.player.action of
                             Action.Move ->
-                                let
-                                    move : Model -> Model
-                                    move f =
-                                        case Model.attemptMove f pos of
-                                            Ok model ->
-                                                model
-
-                                            Err ( _, model ) ->
-                                                model
-                                in
-                                    Gang.update fighter.id (Maybe.map move) game.player.gang
-                                        |> (\gang -> { game | player = game.player |> (\p -> { p | gang = gang, action = Action.Await }) })
-                                        |> (flip (,)) Cmd.none
+                                Player.takeAction (Player.Movement fighter pos) game.player
+                                    |> (\player -> { game | player = player })
+                                    |> (flip (,)) (Task.perform (always NoOp) Complete (Task.succeed Action.Move))
 
                             _ ->
-                                let
-                                    pos =
-                                        positionFromMouseCoords ( x, y ) game.windowScale
-                                in
-                                    if Tabletop.isWithinDistance 2 fighter.position pos then
-                                        ( game, Cmd.none )
-                                    else
-                                        ( { game | player = Player.deselectAll game.player }, Cmd.none )
+                                if Tabletop.isWithinDistance 2 fighter.position pos then
+                                    ( game, Cmd.none )
+                                else
+                                    ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
                 Nothing ->
                     ( game, Cmd.none )
 
         Command action ->
             ( { game | player = game.player |> \p -> { p | action = action } }, Cmd.none )
+
+        Complete action ->
+            let
+                updateGame : GameState
+                updateGame =
+                    case action of
+                        Action.Move ->
+                            if Gang.toList game.player.gang |> List.any (\m -> m.remainingMove > 0) then
+                                game
+                            else
+                                { game | turn = Turn.advance game.turn }
+
+                        _ ->
+                            game
+            in
+                ( { updateGame | player = Player.await updateGame.player }, Cmd.none )
 
         Hover { x, y } ->
             ( { game
