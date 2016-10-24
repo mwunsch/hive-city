@@ -1,4 +1,4 @@
-module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toArray, get, map, generator, positionedGenerator, view)
+module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toList, toArray, get, map, generator, positionedGenerator, view)
 
 import Array exposing (Array)
 import Dict exposing (Dict, toList)
@@ -103,6 +103,10 @@ update : Id -> (Maybe Model -> Maybe Model) -> Gang -> Gang
 update id transform (Gang params) =
     Gang { params | roster = (Dict.update id transform params.roster) }
 
+toList : Gang -> List Model
+toList (Gang { roster }) =
+    Dict.values roster
+
 
 fromList : List Model -> Gang
 fromList models =
@@ -110,8 +114,8 @@ fromList models =
 
 
 toArray : Gang -> Array Model
-toArray (Gang { roster }) =
-    Dict.values roster |> Array.fromList
+toArray =
+    toList >> Array.fromList
 
 
 get : Id -> Gang -> Maybe Model
@@ -156,7 +160,7 @@ positionedGenerator table =
 
 
 view : Gang -> (Model -> msg) -> Svg msg
-view (Gang { roster }) msg =
-    Dict.values roster
+view gang msg =
+    toList gang
         |> List.map (\fighter -> Model.view fighter (msg fighter))
         |> g []
