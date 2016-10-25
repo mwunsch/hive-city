@@ -35,6 +35,11 @@ posY ( _, y' ) =
     y'
 
 
+aspectRatio : Tabletop -> Float
+aspectRatio { width, height } =
+    toFloat width / toFloat height
+
+
 positionGenerator : Tabletop -> Generator Position
 positionGenerator { width, height } =
     Random.pair (Random.float 1 (toFloat width - 1)) (Random.float 1 (toFloat height - 1))
