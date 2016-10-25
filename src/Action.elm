@@ -1,5 +1,11 @@
 module Action exposing (..)
 
+{-| The `Action` module describes the Action a Player is allowed to
+take during a Phase and is responsible for drawing the user controls
+for those actions.
+
+-}
+
 import List
 import Model exposing (Model)
 import String

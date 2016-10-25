@@ -6,6 +6,7 @@ import Maybe exposing (andThen)
 import Model exposing (Model)
 import Svg exposing (Svg)
 import Tabletop exposing (Tabletop, Position)
+import Task exposing (Task)
 import Turn exposing (Phase)
 
 
@@ -14,6 +15,7 @@ type alias Player =
     , selection : Maybe Model.Id
     , movementIntention : Position
     , action : Action
+    , target : Maybe Model.Id
     }
 
 
@@ -23,6 +25,7 @@ init table =
     , selection = Nothing
     , movementIntention = Tabletop.center table
     , action = Await
+    , target = Nothing
     }
 
 
@@ -52,14 +55,34 @@ getSelectedGangMember player =
     player.selection `andThen` (flip Gang.get) player.gang
 
 
+{-| A Player is always taking some Action (even just Awaiting
+input). The `Instruction` type describes the execution of that action,
+along with what is necessary to execute it.
+
+-}
 type Instruction
-    = Movement Model Position
+    = Moving Model Position
+    | Shooting Model Model
 
 
-takeAction : Instruction -> Player -> Player
-takeAction instruction player =
+type Failure
+    = FailedToMove Model
+
+
+{-| The `execute` function executes the Instruction, and returns a pair of
+an updated Player and a `Task`.
+
+Why a Task? It's a stub so that we can figure out Dice rolls and
+animation. Likely, this will become a `Cmd`.
+
+Note that an Instruction can be executed even when the Player is not
+explicitly taking some Action. The returned Task is parameterized with
+the Action that corresponds to the Instruction.
+-}
+execute : Instruction -> Player -> ( Player, Task Failure Action )
+execute instruction player =
     case instruction of
-        Movement fighter pos ->
+        Moving fighter pos ->
             let
                 move : Model -> Model
                 move f =
@@ -70,7 +93,15 @@ takeAction instruction player =
                         Err ( _, model ) ->
                             model
             in
-                { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
+                ( { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
+                , Task.succeed Move
+                )
+
+        Shooting attacker target ->
+            ( { player | target = Just target.id }
+            , Task.succeed Shoot
+            )
+
 
 await : Player -> Player
 await player =
@@ -96,6 +127,9 @@ actionView player phase msg fighter =
 
         Move ->
             Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove
+
+        Shoot ->
+            Action.emptyView
 
         _ ->
             Action.unimplementedView player.action fighter

@@ -86,7 +86,21 @@ update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
         Select model ->
-            ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
+            case game.player.action of
+                Action.Shoot ->
+                    case Player.getSelectedGangMember game.player of
+                        Just fighter ->
+                            Player.execute (Player.Shooting fighter model) game.player
+                                |> \( player, task ) ->
+                                    ( { game | player = player }
+                                    , Task.perform (always NoOp) Complete task
+                                    )
+
+                        Nothing ->
+                            ( game, Cmd.none )
+
+                _ ->
+                    ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
 
         Click { x, y } ->
             case Player.getSelectedGangMember game.player of
@@ -97,9 +111,11 @@ update msg game =
                     in
                         case game.player.action of
                             Action.Move ->
-                                Player.takeAction (Player.Movement fighter pos) game.player
-                                    |> (\player -> { game | player = player })
-                                    |> (flip (,)) (Task.perform (always NoOp) Complete (Task.succeed Action.Move))
+                                Player.execute (Player.Moving fighter pos) game.player
+                                    |> \( player, task ) ->
+                                        ( { game | player = player }
+                                        , Task.perform (always NoOp) Complete task
+                                        )
 
                             _ ->
                                 if Tabletop.isWithinDistance 2 fighter.position pos then
@@ -122,7 +138,10 @@ update msg game =
                             if Gang.toList game.player.gang |> List.any (\m -> m.remainingMove > 0) then
                                 game
                             else
-                                { game | turn = Turn.advance game.turn }
+                                { game
+                                    | turn = Turn.advance game.turn
+                                    , player = Player.deselectAll game.player
+                                }
 
                         _ ->
                             game
@@ -130,13 +149,9 @@ update msg game =
                 ( { updateGame | player = Player.await updateGame.player }, Cmd.none )
 
         Hover { x, y } ->
-            ( { game
-                | player =
-                    game.player
-                        |> \p -> { p | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale }
-              }
-            , Cmd.none
-            )
+            game.player
+                |> (\player -> { player | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale })
+                |> \player -> ( { game | player = player }, Cmd.none )
 
         KeyPress key ->
             let
