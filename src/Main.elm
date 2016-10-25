@@ -268,7 +268,15 @@ view game =
                 |> Maybe.withDefault (Html.table [] [])
 
         definitions =
-            defs [] []
+            defs []
+                [ Svg.clipPath [ id "clip-off-table" ]
+                    [ rect
+                        [ width (game.tabletop.width |> toString)
+                        , height (game.tabletop.height |> toString)
+                        ]
+                        []
+                    ]
+                ]
 
         letterbox =
             game.offset // 2 |> negate
@@ -280,13 +288,13 @@ view game =
                         |> map toString
                         |> join " "
                     )
-                , width
-                    (game.windowWidth |> toString)
+                , width (game.windowWidth |> toString)
                 , Svg.Attributes.style "background-color: black"
                 ]
                 [ definitions
                 , g
                     [ onClickWithCoords Click
+                    , Svg.Attributes.clipPath "url(#clip-off-table)"
                     ]
                     [ Tabletop.view game.tabletop
                     , actionSelection

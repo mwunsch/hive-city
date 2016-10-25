@@ -37,7 +37,7 @@ posY ( _, y' ) =
 
 positionGenerator : Tabletop -> Generator Position
 positionGenerator { width, height } =
-    Random.pair (Random.float 0 (toFloat width)) (Random.float 0 (toFloat height))
+    Random.pair (Random.float 1 (toFloat width - 1)) (Random.float 1 (toFloat height - 1))
 
 
 offTable : Position
