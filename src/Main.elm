@@ -17,7 +17,7 @@ import Random
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Tabletop exposing (Tabletop, positionFromMouseCoords)
+import Tabletop exposing (Tabletop)
 import Task
 import Turn exposing (Turn, Phase(..))
 import Window
@@ -42,6 +42,7 @@ type alias GameState =
     , tabletop : Tabletop
     , windowWidth : Int
     , windowScale : Float
+    , offset : Int
     , turn : Turn
     }
 
@@ -56,6 +57,7 @@ init =
           , tabletop = table
           , windowWidth = 1000
           , windowScale = 10
+          , offset = 10
           , turn = Turn.init
           }
         , Cmd.batch
@@ -107,7 +109,7 @@ update msg game =
                 Just fighter ->
                     let
                         pos =
-                            positionFromMouseCoords ( x, y ) game.windowScale
+                            positionFromMouseCoords ( x, y ) game
                     in
                         case game.player.action of
                             Action.Move ->
@@ -150,7 +152,7 @@ update msg game =
 
         Hover { x, y } ->
             game.player
-                |> (\player -> { player | movementIntention = positionFromMouseCoords ( x, y ) game.windowScale })
+                |> (\player -> { player | movementIntention = positionFromMouseCoords ( x, y ) game })
                 |> \player -> ( { game | player = player }, Cmd.none )
 
         KeyPress key ->
@@ -215,6 +217,22 @@ update msg game =
                 ( game, Cmd.none )
 
 
+positionFromMouseCoords : ( Int, Int ) -> GameState -> Tabletop.Position
+positionFromMouseCoords ( x, y ) { windowScale, offset } =
+    let
+        transform : Int -> Float
+        transform a =
+            toFloat a / windowScale
+
+        x' =
+            transform x
+
+        y' =
+            transform y - toFloat (offset // 2)
+    in
+        ( x', y' )
+
+
 
 -- SUBSCRIPTIONS
 
@@ -251,19 +269,29 @@ view game =
 
         definitions =
             defs [] []
+
+        letterbox =
+            game.offset // 2 |> negate
     in
         Html.div []
             [ svg
                 [ viewBox
-                    ([ 0, 0, game.tabletop.width, game.tabletop.height ] |> map toString |> join " ")
+                    ([ 0, letterbox, game.tabletop.width, game.tabletop.height + game.offset ]
+                        |> map toString
+                        |> join " "
+                    )
                 , width
                     (game.windowWidth |> toString)
-                , onClickWithCoords Click
+                , Svg.Attributes.style "background-color: black"
                 ]
                 [ definitions
-                , Tabletop.view game.tabletop
-                , actionSelection
-                , Gang.view game.player.gang Select
+                , g
+                    [ onClickWithCoords Click
+                    ]
+                    [ Tabletop.view game.tabletop
+                    , actionSelection
+                    , Gang.view game.player.gang Select
+                    ]
                 ]
             , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]
             , selectedFighterProfile

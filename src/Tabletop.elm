@@ -60,22 +60,6 @@ by w h =
     Tabletop (round <| foot w) (round <| foot h)
 
 
-positionFromMouseCoords : ( Int, Int ) -> Float -> Position
-positionFromMouseCoords ( x, y ) scale =
-    let
-        transform : Int -> Float
-        transform a =
-            (toFloat a) / scale
-
-        x' =
-            transform x
-
-        y' =
-            transform y
-    in
-        ( x', y' )
-
-
 center : Tabletop -> Position
 center table =
     ( toFloat table.width / 2, toFloat table.height / 2 )
