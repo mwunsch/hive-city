@@ -20,6 +20,7 @@ import Svg.Attributes exposing (..)
 import Tabletop exposing (Tabletop)
 import Task
 import Turn exposing (Turn, Phase(..))
+import Utilities exposing (textNode, htmlAsSvg)
 import Window
 
 
@@ -44,7 +45,12 @@ type alias GameState =
     , windowScale : Float
     , offset : Int
     , turn : Turn
+    , contextMessage : Maybe ContextMessage
     }
+
+
+type alias ContextMessage =
+    ( String, String )
 
 
 init : ( GameState, Cmd Msg )
@@ -59,6 +65,7 @@ init =
           , windowScale = 10
           , offset = 10
           , turn = Turn.init
+          , contextMessage = Nothing
           }
         , Cmd.batch
             [ Task.perform (always NoOp) Resize Window.width
@@ -262,10 +269,8 @@ view game =
         actionSelection =
             Player.view game.player (Turn.phase game.turn) Command
 
-        selectedFighterProfile =
-            Player.getSelectedGangMember game.player
-                |> Maybe.map Model.viewProfile
-                |> Maybe.withDefault (Html.table [] [])
+        letterbox =
+            game.offset // 2 |> negate
 
         definitions =
             defs []
@@ -278,8 +283,47 @@ view game =
                     ]
                 ]
 
-        letterbox =
-            game.offset // 2 |> negate
+        contextMessage =
+            let
+                currentTurn =
+                    [ Turn.round game.turn |> toString, Turn.phase game.turn |> toString ]
+                        |> String.join " - "
+            in
+                Maybe.withDefault ( "white", currentTurn ) game.contextMessage
+                    |> \( color, msg ) ->
+                        text'
+                            [ y "-2.5"
+                            , x "50%"
+                            , fill color
+                            , fontSize "1.4"
+                            , fontFamily "monospace"
+                            , textAnchor "middle"
+                            ]
+                            (textNode msg)
+
+        selectedFighterProfile =
+            Player.getSelectedGangMember game.player
+                |> Maybe.map Model.viewProfile
+                |> Maybe.withDefault (Html.table [] [])
+                |> htmlAsSvg
+                    [ x (game.tabletop.width // 2 |> toString)
+                    , y (game.tabletop.height |> toString)
+                    , width "50%"
+                    , height (negate letterbox |> toString)
+                    , fontFamily "monospace"
+                    , fontSize "1"
+                    , Svg.Attributes.style "color: mediumslateblue; text-align: right;"
+                    ]
+
+        gameplay =
+            g
+                [ onClickWithCoords Click
+                , Svg.Attributes.clipPath "url(#clip-off-table)"
+                ]
+                [ Tabletop.view game.tabletop
+                , actionSelection
+                , Gang.view game.player.gang Select
+                ]
     in
         Html.div []
             [ svg
@@ -292,15 +336,8 @@ view game =
                 , Svg.Attributes.style "background-color: black"
                 ]
                 [ definitions
-                , g
-                    [ onClickWithCoords Click
-                    , Svg.Attributes.clipPath "url(#clip-off-table)"
-                    ]
-                    [ Tabletop.view game.tabletop
-                    , actionSelection
-                    , Gang.view game.player.gang Select
-                    ]
+                , contextMessage
+                , selectedFighterProfile
+                , gameplay
                 ]
-            , Html.strong [] [ Html.text (Turn.phase game.turn |> toString) ]
-            , selectedFighterProfile
             ]

@@ -285,7 +285,7 @@ viewProfile model =
                 ]
     in
         table
-            []
+            [ Svg.Attributes.style "border-collapse: collapse; line-height: 0;" ]
             [ colgroup [] [ col [] [] ]
             , tr [] <|
                 th [] [ Html.text (model.fighterType |> toString) ]
