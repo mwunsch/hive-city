@@ -194,6 +194,16 @@ update msg game =
                     54 ->
                         ( lookupFighter 5, Cmd.none )
 
+                    109 ->
+                        case Player.getSelectedGangMember game.player of
+                            Just _ ->
+                                ( { game | player = game.player |> \p -> { p | action = Action.Move } }
+                                , Cmd.none
+                                )
+
+                            Nothing ->
+                                ( game, Cmd.none )
+
                     _ ->
                         ( game, Cmd.none )
 
