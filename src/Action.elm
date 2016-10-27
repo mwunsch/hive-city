@@ -27,8 +27,8 @@ type Action
     | Fight
 
 
-select : Phase -> Model -> List Action
-select phase fighter =
+select : Phase -> List Action
+select phase =
     case phase of
         Movement ->
             -- [ Charge, Run, Hide, Cancel,
@@ -45,56 +45,82 @@ select phase fighter =
             [ Cancel ]
 
 
+canModelTakeAction : Model -> Action -> Bool
+canModelTakeAction model action =
+    case action of
+        Move ->
+            model.remainingMove > 0
+
+        _ ->
+            True
+
+
 symbol : Action -> String
 symbol action =
     case action of
         Move ->
-            String.fromChar '🚶'
+            "M"
 
         Run ->
-            String.fromChar '🏃'
+            "R"
 
         Shoot ->
-            String.fromChar '🔫'
+            "S"
 
         _ ->
-            String.fromChar '🔜'
+            "?"
 
 
-viewControl : Action -> msg -> Svg msg
-viewControl action msg =
-    g
-        [ transform "translate(0,1.15)"
-        , onClickWithoutPropagation msg
-        , Svg.Attributes.cursor "pointer"
+viewSelection : Model -> Svg msg
+viewSelection { position, remainingMove } =
+    circle
+        [ r (remainingMove |> toString)
+        , fill "white"
+        , opacity "0.15"
+        , cx (position |> posX |> toString)
+        , cy (position |> posY |> toString)
         ]
-        [ circle
-            [ r (Tabletop.millimeter 12 |> toString)
-            , fill "white"
-            , opacity "0.75"
-            ]
-            []
-        , text'
-            [ fontSize (Tabletop.millimeter 15 |> toString)
-            , textAnchor "middle"
-            , alignmentBaseline "middle"
-            ]
-            (symbol action |> textNode)
-        ]
+        []
 
 
-{-| TODO: Just drawing a circle for now until can come up with better HUD.
--}
-viewSelection : Phase -> Model -> (Action -> msg) -> Svg msg
-viewSelection phase model msg =
-    g [ transformTranslate model.position ] <|
-        circle
-            [ r "1.25"
-            , fill "white"
-            , opacity "0.15"
+viewControls : Phase -> Model -> (Action -> msg) -> List (Svg msg)
+viewControls phase fighter message =
+    select phase
+        |> List.map
+            (\action ->
+                viewControl action (canModelTakeAction fighter action) (message action)
+            )
+
+
+viewControl : Action -> Bool -> msg -> Svg msg
+viewControl action isEnabled message =
+    let
+        cursor =
+            if isEnabled then
+                "pointer"
+            else
+                "no-drop"
+
+        color =
+            if isEnabled then
+                "white"
+            else
+                "grey"
+    in
+        g
+            [ onClickWithoutPropagation message
+            , Svg.Attributes.cursor cursor
+            , class "control"
             ]
-            []
-            :: List.map (\action -> viewControl action (msg action)) (select phase model)
+            [ text'
+                [ fontSize "2"
+                , fontFamily "monospace"
+                , fill color
+                , alignmentBaseline "middle"
+                , textAnchor "start"
+                ]
+                (symbol action |> textNode)
+            ]
 
 
 emptyView : Svg msg
@@ -112,18 +138,3 @@ unimplementedView action model =
             ]
             []
         ]
-
-
-{-| TODO: Make the below `view` fn better.
-The actions should form a circle around the fighter character
--}
-viewAll : Phase -> Model -> Svg msg
-viewAll phase fighter =
-    select phase fighter
-        |> List.map symbol
-        |> (String.join " " >> text >> List.repeat 1)
-        |> text'
-            [ fontSize (Tabletop.millimeter 20 |> toString)
-            , x (fighter.position |> posX |> (flip (-)) (Tabletop.millimeter 20) |> toString)
-            , y (fighter.position |> posY |> (+) (Tabletop.millimeter 40) |> toString)
-            ]

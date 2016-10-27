@@ -4,7 +4,8 @@ import Action exposing (Action(..))
 import Gang exposing (Gang)
 import Maybe exposing (andThen)
 import Model exposing (Model)
-import Svg exposing (Svg)
+import Svg exposing (Svg, g)
+import Svg.Attributes exposing (..)
 import Tabletop exposing (Tabletop, Position)
 import Task exposing (Task)
 import Turn exposing (Phase)
@@ -113,17 +114,17 @@ await player =
 
 
 view : Player -> Phase -> (Action -> msg) -> Svg msg
-view player phase msg =
+view player phase message =
     getSelectedGangMember player
-        |> Maybe.map (actionView player phase msg)
+        |> Maybe.map (actionView player phase message)
         |> Maybe.withDefault (Action.emptyView)
 
 
 actionView : Player -> Phase -> (Action -> msg) -> Model -> Svg msg
-actionView player phase msg fighter =
+actionView player phase message fighter =
     case player.action of
         Await ->
-            Action.viewSelection phase fighter msg
+            Action.viewSelection fighter
 
         Move ->
             Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove

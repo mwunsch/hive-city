@@ -270,7 +270,7 @@ view game =
             Player.view game.player (Turn.phase game.turn) Command
 
         letterbox =
-            game.offset // 2 |> negate
+            game.offset // 2
 
         definitions =
             defs []
@@ -309,10 +309,21 @@ view game =
                     [ x (game.tabletop.width // 2 |> toString)
                     , y (game.tabletop.height |> toString)
                     , width "50%"
-                    , height (negate letterbox |> toString)
+                    , height (letterbox |> toString)
                     , fontFamily "monospace"
                     , fontSize "1"
                     , Svg.Attributes.style "color: mediumslateblue; text-align: right;"
+                    ]
+
+        controls =
+            Player.getSelectedGangMember game.player
+                |> Maybe.map (\fighter -> Action.viewControls (Turn.phase game.turn) fighter Command)
+                |> Maybe.withDefault []
+                |> g
+                    [ Tabletop.transformTranslate
+                        ( toFloat letterbox
+                        , (game.tabletop.height + (letterbox // 2) |> toFloat)
+                        )
                     ]
 
         gameplay =
@@ -328,7 +339,7 @@ view game =
         Html.div []
             [ svg
                 [ viewBox
-                    ([ 0, letterbox, game.tabletop.width, game.tabletop.height + game.offset ]
+                    ([ 0, negate letterbox, game.tabletop.width, game.tabletop.height + game.offset ]
                         |> map toString
                         |> join " "
                     )
@@ -338,6 +349,7 @@ view game =
                 [ definitions
                 , contextMessage
                 , selectedFighterProfile
+                , controls
                 , gameplay
                 ]
             ]
