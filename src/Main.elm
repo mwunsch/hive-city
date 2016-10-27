@@ -305,7 +305,7 @@ view game =
             Player.getSelectedGangMember game.player
                 |> Maybe.map Model.viewProfile
                 |> Maybe.withDefault (Html.table [] [])
-                |> htmlAsSvg
+                |> htmlAsSvg "selected-fighter-profile"
                     [ x (game.tabletop.width // 2 |> toString)
                     , y (game.tabletop.height |> toString)
                     , width "50%"
@@ -315,15 +315,19 @@ view game =
                     , Svg.Attributes.style "color: mediumslateblue; text-align: right;"
                     ]
 
+        controlArea : Tabletop.Position
+        controlArea =
+            ( toFloat letterbox
+            , game.tabletop.height + (letterbox // 2) |> toFloat
+            )
+
         controls =
             Player.getSelectedGangMember game.player
                 |> Maybe.map (\fighter -> Action.viewControls (Turn.phase game.turn) fighter Command)
                 |> Maybe.withDefault []
                 |> g
-                    [ Tabletop.transformTranslate
-                        ( toFloat letterbox
-                        , (game.tabletop.height + (letterbox // 2) |> toFloat)
-                        )
+                    [ Tabletop.transformTranslate controlArea
+                    , class "controls"
                     ]
 
         gameplay =

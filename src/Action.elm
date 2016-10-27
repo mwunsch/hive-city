@@ -11,6 +11,7 @@ import Model exposing (Model)
 import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Html.Attributes exposing (classList)
 import Tabletop exposing (Inch, posX, posY, transformTranslate)
 import Turn exposing (Turn, Phase(..))
 import Utilities exposing (onClickWithoutPropagation, textNode)
@@ -93,16 +94,16 @@ viewControls phase fighter message =
 
 
 viewControl : Action -> Bool -> msg -> Svg msg
-viewControl action isEnabled message =
+viewControl action canAct message =
     let
         cursor =
-            if isEnabled then
+            if canAct then
                 "pointer"
             else
                 "no-drop"
 
         color =
-            if isEnabled then
+            if canAct then
                 "white"
             else
                 "grey"

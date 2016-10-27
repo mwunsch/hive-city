@@ -1,7 +1,7 @@
 module Utilities exposing (..)
 
 import Html exposing (Html, Attribute)
-import Html.Attributes exposing (attribute)
+import Html.Attributes exposing (attribute, class)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
 import List
@@ -18,9 +18,12 @@ textNode =
     Html.text >> List.repeat 1
 
 
-htmlAsSvg : List (Attribute msg) -> Html msg -> Svg msg
-htmlAsSvg attrs =
+htmlAsSvg : String -> List (Attribute msg) -> Html msg -> Svg msg
+htmlAsSvg name attrs =
     List.repeat 1
-        >> Html.div [ attribute "xmlns" "http://www.w3.org/1999/xhtml" ]
+        >> Html.div
+            [ class name
+            , attribute "xmlns" "http://www.w3.org/1999/xhtml"
+            ]
         >> List.repeat 1
         >> foreignObject attrs
