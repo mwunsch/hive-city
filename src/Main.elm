@@ -291,6 +291,7 @@ view game =
                         ]
                         []
                     ]
+                , Tabletop.viewMarker
                 ]
 
         contextMessage =

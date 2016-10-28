@@ -2,7 +2,7 @@ module Tabletop exposing (..)
 
 import Random exposing (Generator)
 import String
-import Svg exposing (Svg, rect, g, line)
+import Svg exposing (Svg, rect, g, line, marker, circle, path)
 import Svg.Attributes exposing (..)
 
 
@@ -134,27 +134,40 @@ viewMeasuringTape start end range =
                 positionFromDirection start end range
             else
                 end
+
+        markerRef =
+            if (length > range) then
+                "url(#measuring-marker)"
+            else
+                "none"
     in
-        g []
-            [ line
-                [ x1 (start |> posX |> toString)
-                , y1 (start |> posY |> toString)
-                , x2 (rangeX |> toString)
-                , y2 (rangeY |> toString)
-                , stroke "yellow"
-                , strokeWidth (millimeter 16 |> toString)
-                ]
-                []
-            , line
-                [ x1 (rangeX |> toString)
-                , y1 (rangeY |> toString)
-                , x2 (end |> posX |> toString)
-                , y2 (end |> posY |> toString)
-                , stroke "grey"
-                , strokeWidth (millimeter 16 |> toString)
-                ]
-                []
+        line
+            [ x1 (start |> posX |> toString)
+            , y1 (start |> posY |> toString)
+            , x2 (rangeX |> toString)
+            , y2 (rangeY |> toString)
+            , stroke "yellow"
+            , strokeWidth (millimeter 16 |> toString)
+            , markerEnd markerRef
+            , opacity "0.65"
+            , strokeLinecap "round"
+            , class "measuringTape"
             ]
+            []
+
+
+viewMarker : Svg msg
+viewMarker =
+    marker
+        [ id "measuring-marker"
+        , markerHeight "2"
+        , markerWidth "2"
+        , refX "0.5"
+        , refY "1"
+        , markerUnits "strokeWidth"
+        , orient "auto"
+        ]
+        [ Svg.path [ d "M0,0 L0,2 L2,1 z", fill "yellow" ] [] ]
 
 
 transformTranslate : Position -> Svg.Attribute msg
