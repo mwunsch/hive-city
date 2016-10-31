@@ -106,7 +106,7 @@ update msg game =
                                     )
 
                         Nothing ->
-                            ( game, Cmd.none )
+                            update NoOp game
 
                 _ ->
                     ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
@@ -140,7 +140,7 @@ update msg game =
                                     ( { game | player = Player.deselectAll game.player }, Cmd.none )
 
                 Nothing ->
-                    ( game, Cmd.none )
+                    update NoOp game
 
         Command action ->
             ( { game | player = game.player |> \p -> { p | action = action } }, Cmd.none )
@@ -204,15 +204,21 @@ update msg game =
                     109 ->
                         case Player.getSelectedGangMember game.player of
                             Just _ ->
-                                ( { game | player = game.player |> \p -> { p | action = Action.Move } }
-                                , Cmd.none
-                                )
+                                update (Command Action.Move) game
 
                             Nothing ->
-                                ( game, Cmd.none )
+                                update NoOp game
+
+                    114 ->
+                        case Player.getSelectedGangMember game.player of
+                            Just _ ->
+                                update (Command Action.Run) game
+
+                            Nothing ->
+                                update NoOp game
 
                     _ ->
-                        ( game, Cmd.none )
+                        update NoOp game
 
         Resize w ->
             ( { game
