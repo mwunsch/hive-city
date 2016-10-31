@@ -126,6 +126,13 @@ update msg game =
                                         , Task.perform (always NoOp) Complete task
                                         )
 
+                            Action.Run ->
+                                Player.execute (Player.Running fighter pos) game.player
+                                    |> \( player, task ) ->
+                                        ( { game | player = player }
+                                        , Task.perform (always NoOp) Complete task
+                                        )
+
                             _ ->
                                 if Tabletop.isWithinDistance 2 fighter.position pos then
                                     ( game, Cmd.none )
@@ -335,6 +342,7 @@ view game =
         controls =
             Player.getSelectedGangMember game.player
                 |> Maybe.map (\fighter -> Action.viewControls (Turn.phase game.turn) fighter Command)
+                |> Maybe.map (List.repeat 1)
                 |> Maybe.withDefault []
                 |> g
                     [ Tabletop.transformTranslate controlArea

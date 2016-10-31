@@ -8,10 +8,8 @@ for those actions.
 
 import List
 import Model exposing (Model)
-import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Html.Attributes exposing (classList)
 import Tabletop exposing (Inch, posX, posY, transformTranslate)
 import Turn exposing (Turn, Phase(..))
 import Utilities exposing (onClickWithoutPropagation, textNode)
@@ -33,7 +31,7 @@ select phase =
     case phase of
         Movement ->
             -- [ Charge, Run, Hide, Cancel,
-            [ Move ]
+            [ Move, Run ]
 
         Shooting ->
             -- [ Cancel,
@@ -51,6 +49,9 @@ canModelTakeAction model action =
     case action of
         Move ->
             model.remainingMove > 0
+
+        Run ->
+            Model.canRun model
 
         _ ->
             True
@@ -84,13 +85,19 @@ viewSelection { position, remainingMove } =
         []
 
 
-viewControls : Phase -> Model -> (Action -> msg) -> List (Svg msg)
+viewControls : Phase -> Model -> (Action -> msg) -> Svg msg
 viewControls phase fighter message =
     select phase
         |> List.map
             (\action ->
                 viewControl action (canModelTakeAction fighter action) (message action)
             )
+        |> text'
+            [ fontSize "2"
+            , fontFamily "monospace"
+            , alignmentBaseline "middle"
+            , textAnchor "start"
+            ]
 
 
 viewControl : Action -> Bool -> msg -> Svg msg
@@ -108,20 +115,14 @@ viewControl action canAct message =
             else
                 "grey"
     in
-        g
+        tspan
             [ onClickWithoutPropagation message
             , Svg.Attributes.cursor cursor
             , class "control"
+            , fill color
+            , dx "1.5"
             ]
-            [ text'
-                [ fontSize "2"
-                , fontFamily "monospace"
-                , fill color
-                , alignmentBaseline "middle"
-                , textAnchor "start"
-                ]
-                (symbol action |> textNode)
-            ]
+            (symbol action |> textNode)
 
 
 emptyView : Svg msg

@@ -247,6 +247,35 @@ attemptMove model pos =
                 )
 
 
+canRun : Model -> Bool
+canRun model =
+    model.remainingMove == model.profile.move
+
+
+{-| A Model can run twice their total movement in the Movement phase,
+but lose their abilit to shoot in the shooting phase.
+
+TODO:
+
+> If a running model approaches within 8" of an enemy that he can see
+  he must stop immediately.
+
+-}
+run : Model -> Position -> Model
+run model pos =
+    let
+        distance =
+            Tabletop.distance model.position pos
+
+        maxPosition =
+            Tabletop.positionFromDirection model.position pos (model.remainingMove * 2)
+    in
+        if (canRun model) then
+            { model | position = maxPosition, remainingMove = 0 }
+        else
+            model
+
+
 view : Model -> msg -> Svg msg
 view model msg =
     text'

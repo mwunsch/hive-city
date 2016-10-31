@@ -5,7 +5,6 @@ import Gang exposing (Gang)
 import Maybe exposing (andThen)
 import Model exposing (Model)
 import Svg exposing (Svg, g)
-import Svg.Attributes exposing (..)
 import Tabletop exposing (Tabletop, Position)
 import Task exposing (Task)
 import Turn exposing (Phase)
@@ -63,6 +62,7 @@ along with what is necessary to execute it.
 -}
 type Instruction
     = Moving Model Position
+    | Running Model Position
     | Shooting Model Model
 
 
@@ -98,6 +98,11 @@ execute instruction player =
                 , Task.succeed Move
                 )
 
+        Running fighter pos ->
+            ( { player | gang = Gang.update fighter.id (Maybe.map ((flip Model.run) pos)) player.gang }
+            , Task.succeed Run
+            )
+
         Shooting attacker target ->
             ( { player | target = Just target.id }
             , Task.succeed Shoot
@@ -128,6 +133,9 @@ actionView player phase message fighter =
 
         Move ->
             Tabletop.viewMeasuringTape fighter.position player.movementIntention fighter.remainingMove
+
+        Run ->
+            Tabletop.viewMeasuringTape fighter.position player.movementIntention (fighter.remainingMove * 2)
 
         Shoot ->
             Action.emptyView
