@@ -149,8 +149,8 @@ update msg game =
             let
                 updateGame : GameState
                 updateGame =
-                    case action of
-                        Action.Move ->
+                    case Turn.phase game.turn of
+                        Movement ->
                             if Gang.toList game.player.gang |> List.any (\m -> m.remainingMove > 0) then
                                 game
                             else
