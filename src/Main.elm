@@ -143,7 +143,25 @@ update msg game =
                     update NoOp game
 
         Command action ->
-            ( { game | player = game.player |> \p -> { p | action = action } }, Cmd.none )
+            let
+                message : Maybe ContextMessage
+                message =
+                    case action of
+                        Action.Move ->
+                            Just ( "lightblue", "Click to move your dude" )
+
+                        Action.Shoot ->
+                            Just ( "red", "Select a target" )
+
+                        _ ->
+                            Nothing
+            in
+                ( { game
+                    | player = game.player |> \p -> { p | action = action }
+                    , contextMessage = message
+                  }
+                , Cmd.none
+                )
 
         Complete action ->
             let
