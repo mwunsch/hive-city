@@ -55,6 +55,11 @@ getSelectedGangMember player =
     player.selection `andThen` (flip Gang.get) player.gang
 
 
+getTargetedModel : Player -> Maybe Model
+getTargetedModel player =
+    player.target `andThen` (flip Gang.get) player.gang
+
+
 {-| A Player is always taking some Action (even just Awaiting
 input). The `Instruction` type describes the execution of that action,
 along with what is necessary to execute it.
@@ -136,9 +141,6 @@ actionView player phase message fighter =
 
         Run ->
             Tabletop.viewMeasuringTape fighter.position player.movementIntention (fighter.remainingMove * 2)
-
-        Shoot ->
-            Action.emptyView
 
         _ ->
             Action.unimplementedView player.action fighter

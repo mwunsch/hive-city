@@ -85,6 +85,18 @@ viewSelection { position, remainingMove } =
         []
 
 
+viewTarget : Model -> Svg msg
+viewTarget { position } =
+    circle
+        [ r "1"
+        , fill "red"
+        , opacity "0.15"
+        , cx (position |> posX |> toString)
+        , cy (position |> posY |> toString)
+        ]
+        []
+
+
 viewControls : Phase -> Model -> (Action -> msg) -> Svg msg
 viewControls phase fighter message =
     select phase

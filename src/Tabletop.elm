@@ -136,7 +136,7 @@ viewMeasuringTape start end range =
                 end
 
         markerRef =
-            if (length > range) then
+            if (length <= range) then
                 "url(#measuring-marker)"
             else
                 "none"

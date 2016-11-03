@@ -137,7 +137,12 @@ update msg game =
                                 if Tabletop.isWithinDistance 2 fighter.position pos then
                                     ( game, Cmd.none )
                                 else
-                                    ( { game | player = Player.deselectAll game.player }, Cmd.none )
+                                    ( { game
+                                        | player = Player.deselectAll game.player
+                                        , contextMessage = Nothing
+                                      }
+                                    , Cmd.none
+                                    )
 
                 Nothing ->
                     update NoOp game
@@ -149,6 +154,9 @@ update msg game =
                     case action of
                         Action.Move ->
                             Just ( "lightblue", "Click to move your dude" )
+
+                        Action.Run ->
+                            Just ( "lightblue", "Click to run to a point" )
 
                         Action.Shoot ->
                             Just ( "red", "Select a target" )
@@ -180,7 +188,12 @@ update msg game =
                         _ ->
                             game
             in
-                ( { updateGame | player = Player.await updateGame.player }, Cmd.none )
+                ( { updateGame
+                    | player = Player.await updateGame.player
+                    , contextMessage = Nothing
+                  }
+                , Cmd.none
+                )
 
         Hover { x, y } ->
             game.player
