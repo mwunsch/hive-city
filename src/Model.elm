@@ -24,6 +24,7 @@ import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
 import Utilities exposing (textNode, onClickWithoutPropagation)
 import Uuid exposing (Uuid, uuid)
+import Weapons exposing (Weapon, knife)
 
 
 type alias Model =
@@ -37,6 +38,7 @@ type alias Model =
     , id : Id
     , fighterType : FighterType
     , name : String
+    , equipment : List Weapon
     }
 
 
@@ -186,6 +188,7 @@ init role =
         , id = Uuid.scheme
         , fighterType = role
         , name = "Mac McMadd"
+        , equipment = [ knife ]
         }
 
 
