@@ -13,6 +13,7 @@ import Svg.Attributes exposing (..)
 import Tabletop exposing (Inch, posX, posY, transformTranslate)
 import Turn exposing (Turn, Phase(..))
 import Utilities exposing (onClickWithoutPropagation, textNode)
+import Weapons exposing (Weapon, autogun)
 
 
 type Action
@@ -22,7 +23,7 @@ type Action
     | Charge
     | Run
     | Hide
-    | Shoot
+    | Shoot Weapon
     | Fight
 
 
@@ -35,7 +36,7 @@ select phase =
 
         Shooting ->
             -- [ Cancel,
-            [ Shoot ]
+            [ Shoot autogun ]
 
         HandToHand ->
             [ Cancel ]
@@ -66,7 +67,7 @@ symbol action =
         Run ->
             "R"
 
-        Shoot ->
+        Shoot weapon ->
             "S"
 
         _ ->

@@ -96,7 +96,7 @@ update msg game =
     case msg of
         Select model ->
             case game.player.action of
-                Action.Shoot ->
+                Action.Shoot _ ->
                     case Player.getSelectedGangMember game.player of
                         Just fighter ->
                             Player.execute (Player.Shooting fighter model) game.player
@@ -158,7 +158,7 @@ update msg game =
                         Action.Run ->
                             Just ( "lightblue", "Click to run to a point" )
 
-                        Action.Shoot ->
+                        Action.Shoot _ ->
                             Just ( "red", "Select a target" )
 
                         _ ->
