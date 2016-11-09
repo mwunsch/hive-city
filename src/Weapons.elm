@@ -50,6 +50,20 @@ asUser =
     (+) 0
 
 
+plusOne : Modifier
+plusOne =
+    (+) 1
+
+
+plusTwo : Modifier
+plusTwo =
+    (+) 2
+
+
+
+-- WEAPONS
+
+
 knife : Weapon
 knife =
     Combat
@@ -59,4 +73,28 @@ knife =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Nothing
+        }
+
+
+autopistol : Weapon
+autopistol =
+    Pistol
+        { range = Ranged ( 0, 8 ) ( 8, 16 )
+        , toHit = ( Just plusTwo, Nothing )
+        , strength = Right 3
+        , damage = 1
+        , saveModifier = asUser
+        , ammoRoll = Just 4
+        }
+
+
+autogun : Weapon
+autogun =
+    Basic
+        { range = Ranged ( 0, 12 ) ( 12, 24 )
+        , toHit = ( Just plusOne, Nothing )
+        , strength = Right 3
+        , damage = 1
+        , saveModifier = asUser
+        , ammoRoll = Just 4
         }
