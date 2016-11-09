@@ -34,7 +34,9 @@ select phase fighter =
             [ Move, Run ]
 
         Shooting ->
-            List.map Shoot fighter.equipment
+            fighter.equipment
+                |> List.filter Weapons.isRanged
+                |> List.map Shoot
 
         HandToHand ->
             [ Cancel ]
@@ -66,7 +68,7 @@ symbol action =
             "R"
 
         Shoot weapon ->
-            "S"
+            (Weapons.profile weapon) |> .icon
 
         _ ->
             "?"

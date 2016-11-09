@@ -1,5 +1,6 @@
 module Weapons exposing (..)
 
+import List
 import Tabletop exposing (Inch)
 import Either exposing (Either(..))
 
@@ -20,7 +21,30 @@ type alias Profile =
     , damage : Int
     , saveModifier : Modifier
     , ammoRoll : Maybe Int
+    , icon : String
     }
+
+
+profile : Weapon -> Profile
+profile weapon =
+    case weapon of
+        Combat profile ->
+            profile
+
+        Pistol profile ->
+            profile
+
+        Basic profile ->
+            profile
+
+        Special profile ->
+            profile
+
+        Heavy profile ->
+            profile
+
+        Grenade profile ->
+            profile
 
 
 type Range
@@ -35,6 +59,16 @@ type alias ShortRange =
 
 type alias LongRange =
     ( Inch, Inch )
+
+
+isRanged : Weapon -> Bool
+isRanged weapon =
+    case weapon of
+        Combat _ ->
+            False
+
+        _ ->
+            True
 
 
 {-| For some attributes, like Strength or To Hit, they are a modifier
@@ -73,6 +107,7 @@ knife =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Nothing
+        , icon = "\x1f5e1"
         }
 
 
@@ -85,6 +120,7 @@ autopistol =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Just 4
+        , icon = "\x1f52b"
         }
 
 
@@ -97,4 +133,5 @@ autogun =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Just 4
+        , icon = "\x1f529"
         }
