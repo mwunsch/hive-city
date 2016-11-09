@@ -5,7 +5,7 @@ import Array
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.App as App
-import Html.Events exposing (on)
+import Html.Events exposing (on, onClick)
 import Json.Decode as Json exposing ((:=))
 import Keyboard
 import List exposing (map)
@@ -83,6 +83,7 @@ type Msg
     | Click Mouse.Position
     | Command Action
     | Complete Action
+    | Advance
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
     | Resize Int
@@ -194,6 +195,14 @@ update msg game =
                   }
                 , Cmd.none
                 )
+
+        Advance ->
+            ( { game
+                | turn = Turn.advance game.turn
+                , player = Player.deselectAll game.player
+              }
+            , Cmd.none
+            )
 
         Hover { x, y } ->
             game.player
@@ -356,6 +365,28 @@ view game =
                             ]
                             (textNode msg)
 
+        phaseAdvancement =
+            let
+                msg =
+                    case game.contextMessage of
+                        Just _ ->
+                            textNode ""
+
+                        Nothing ->
+                            textNode "→"
+            in
+                text'
+                    [ y "-2.5"
+                    , x "65%"
+                    , fill "red"
+                    , fontSize "2"
+                    , fontFamily "monospace"
+                    , textAnchor "middle"
+                    , onClick Advance
+                    , Svg.Attributes.cursor "pointer"
+                    ]
+                    msg
+
         selectedFighterProfile =
             Player.getSelectedGangMember game.player
                 |> Maybe.map Model.viewProfile
@@ -408,6 +439,7 @@ view game =
                 ]
                 [ definitions
                 , contextMessage
+                , phaseAdvancement
                 , selectedFighterProfile
                 , controls
                 , gameplay
