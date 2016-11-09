@@ -24,7 +24,7 @@ import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
 import Utilities exposing (textNode, onClickWithoutPropagation)
 import Uuid exposing (Uuid, uuid)
-import Weapons exposing (Weapon, knife)
+import Weapons exposing (Weapon, knife, autogun, autopistol)
 
 
 type alias Model =
@@ -192,6 +192,13 @@ init role =
         }
 
 
+{-| At some point, weapon cost will have to be modeled.
+-}
+equip : Weapon -> Model -> Model
+equip weapon model =
+    { model | equipment = weapon :: model.equipment }
+
+
 cost : Model -> Int
 cost model =
     case model.fighterType of
@@ -216,6 +223,8 @@ generator role =
     in
         uuid
             |> Random.map (\id -> { initial | id = (Debug.log "id" id) })
+            |> Random.map (equip autogun)
+            |> Random.map (equip autopistol)
 
 
 type alias MovementError =
