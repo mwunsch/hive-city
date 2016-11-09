@@ -27,16 +27,14 @@ type Action
     | Fight
 
 
-select : Phase -> List Action
-select phase =
+select : Phase -> Model -> List Action
+select phase fighter =
     case phase of
         Movement ->
-            -- [ Charge, Run, Hide, Cancel,
             [ Move, Run ]
 
         Shooting ->
-            -- [ Cancel,
-            [ Shoot autogun ]
+            List.map Shoot fighter.equipment
 
         HandToHand ->
             [ Cancel ]
@@ -100,7 +98,7 @@ viewTarget { position } =
 
 viewControls : Phase -> Model -> (Action -> msg) -> Svg msg
 viewControls phase fighter message =
-    select phase
+    select phase fighter
         |> List.map
             (\action ->
                 viewControl action (canModelTakeAction fighter action) (message action)

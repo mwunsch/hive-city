@@ -96,10 +96,10 @@ update msg game =
     case msg of
         Select model ->
             case game.player.action of
-                Action.Shoot _ ->
+                Action.Shoot weapon ->
                     case Player.getSelectedGangMember game.player of
                         Just fighter ->
-                            Player.execute (Player.Shooting fighter model) game.player
+                            Player.execute (Player.Shooting fighter model weapon) game.player
                                 |> \( player, task ) ->
                                     ( { game | player = player }
                                     , Task.perform (always NoOp) Complete task

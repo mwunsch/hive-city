@@ -8,7 +8,7 @@ import Svg exposing (Svg, g)
 import Tabletop exposing (Tabletop, Position)
 import Task exposing (Task)
 import Turn exposing (Phase)
-import Weapons exposing (autogun)
+import Weapons exposing (Weapon, autogun)
 
 
 type alias Player =
@@ -69,7 +69,7 @@ along with what is necessary to execute it.
 type Instruction
     = Moving Model Position
     | Running Model Position
-    | Shooting Model Model
+    | Shooting Model Model Weapon
 
 
 type Failure
@@ -109,9 +109,9 @@ execute instruction player =
             , Task.succeed Run
             )
 
-        Shooting attacker target ->
+        Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , Task.succeed (Shoot autogun)
+            , Task.succeed (Shoot weapon)
             )
 
 
