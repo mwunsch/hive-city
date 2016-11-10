@@ -211,10 +211,15 @@ update msg game =
 
                 pivot : Gang
                 pivot =
-                    Player.updateSelectedGangMember game.player
-                        (\model ->
-                            { model | bearing = Tabletop.angle model.position pos }
-                        )
+                    case Turn.phase game.turn of
+                        Movement ->
+                            Player.updateSelectedGangMember game.player
+                                (\model ->
+                                    { model | bearing = Tabletop.angle model.position pos }
+                                )
+
+                        _ ->
+                            game.player.gang
             in
                 game.player
                     |> (\player -> { player | movementIntention = pos, gang = pivot })
