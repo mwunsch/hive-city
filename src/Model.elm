@@ -39,6 +39,7 @@ type alias Model =
     , fighterType : FighterType
     , name : String
     , equipment : List Weapon
+    , bearing : Float
     }
 
 
@@ -189,6 +190,7 @@ init role =
         , fighterType = role
         , name = "Mac McMadd"
         , equipment = [ knife ]
+        , bearing = 0
         }
 
 
@@ -290,24 +292,35 @@ run model pos =
 
 view : Model -> msg -> Svg msg
 view model msg =
-    text'
-        [ fontSize (Tabletop.millimeter 25 |> toString)
-        , fontFamily "monospace"
-        , textAnchor "middle"
-        , alignmentBaseline "middle"
-        , fill <|
-            if model.selected then
-                "white"
-            else
-                "black"
-        , x
-            (model.position |> posX |> toString)
-        , y
-            (model.position |> posY |> toString)
-        , onClickWithoutPropagation msg
-        , Svg.Attributes.cursor "pointer"
-        ]
-        [ text (model.fighterType |> toString |> String.left 1) ]
+    let
+        x' =
+            model.position |> posX |> toString
+
+        y' =
+            model.position |> posY |> toString
+
+        rotation =
+            "rotate("
+                ++ String.join " " [ toString model.bearing, x', y' ]
+                ++ ")"
+    in
+        text'
+            [ fontSize (Tabletop.millimeter 25 |> toString)
+            , fontFamily "monospace"
+            , textAnchor "middle"
+            , alignmentBaseline "middle"
+            , fill <|
+                if model.selected then
+                    "white"
+                else
+                    "black"
+            , x x'
+            , y y'
+            , onClickWithoutPropagation msg
+            , Svg.Attributes.cursor "pointer"
+            , transform rotation
+            ]
+            [ text (model.fighterType |> toString |> String.left 1) ]
 
 
 viewProfile : Model -> Html msg

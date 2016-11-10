@@ -205,9 +205,20 @@ update msg game =
             )
 
         Hover { x, y } ->
-            game.player
-                |> (\player -> { player | movementIntention = positionFromMouseCoords ( x, y ) game })
-                |> \player -> ( { game | player = player }, Cmd.none )
+            let
+                pos =
+                    positionFromMouseCoords ( x, y ) game
+
+                pivot : Gang
+                pivot =
+                    Player.updateSelectedGangMember game.player
+                        (\model ->
+                            { model | bearing = Tabletop.angle model.position pos }
+                        )
+            in
+                game.player
+                    |> (\player -> { player | movementIntention = pos, gang = pivot })
+                    |> \player -> ( { game | player = player }, Cmd.none )
 
         KeyPress key ->
             let

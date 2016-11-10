@@ -107,6 +107,20 @@ positionFromDirection start end len =
         , (posY start) + (cos angle * len)
         )
 
+angle : Position -> Position -> Float
+angle start end =
+    let
+        h =
+            distance start end
+
+        y' =
+            (posY end) - (posY start)
+
+        x' =
+            (posX end) - (posX start)
+    in
+        atan2 y' x' |> (*) 180 |> (flip (/)) pi
+
 
 isWithinDistance : Inch -> Position -> Position -> Bool
 isWithinDistance r start end =

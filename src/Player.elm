@@ -56,6 +56,18 @@ getSelectedGangMember player =
     player.selection `andThen` (flip Gang.get) player.gang
 
 
+updateSelectedGangMember : Player -> (Model -> Model) -> Gang
+updateSelectedGangMember player transform =
+    let
+        updateGang : Model -> Gang
+        updateGang model =
+            Gang.update model.id (Maybe.map transform) player.gang
+    in
+        getSelectedGangMember player
+            |> Maybe.map (updateGang)
+            |> Maybe.withDefault player.gang
+
+
 getTargetedModel : Player -> Maybe Model
 getTargetedModel player =
     player.target `andThen` (flip Gang.get) player.gang
