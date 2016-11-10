@@ -107,17 +107,15 @@ positionFromDirection start end len =
         , (posY start) + (cos angle * len)
         )
 
-angle : Position -> Position -> Float
-angle start end =
-    let
-        h =
-            distance start end
 
+angle : Position -> Position -> Float
+angle (startX, startY) (endX, endY) =
+    let
         y' =
-            (posY end) - (posY start)
+            endY - startY
 
         x' =
-            (posX end) - (posX start)
+            endX - startX
     in
         atan2 y' x' |> (*) 180 |> (flip (/)) pi
 

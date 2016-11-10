@@ -214,9 +214,7 @@ update msg game =
                     case Turn.phase game.turn of
                         Movement ->
                             Player.updateSelectedGangMember game.player
-                                (\model ->
-                                    { model | bearing = Tabletop.angle model.position pos }
-                                )
+                                (\model -> { model | bearing = Tabletop.angle model.position pos })
 
                         _ ->
                             game.player.gang
