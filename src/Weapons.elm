@@ -60,6 +60,15 @@ type alias ShortRange =
 type alias LongRange =
     ( Inch, Inch )
 
+maxRange : Weapon -> Inch
+maxRange weapon =
+    case .range (profile weapon) of
+        Ranged ( _, _ ) ( _, max ) ->
+            max
+
+        _ ->
+            0
+
 
 isRanged : Weapon -> Bool
 isRanged weapon =
