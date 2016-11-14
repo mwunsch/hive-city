@@ -2,7 +2,7 @@ module Tabletop exposing (..)
 
 import Random exposing (Generator)
 import String
-import Svg exposing (Svg, rect, g, line, marker, circle, path)
+import Svg exposing (Svg, rect, g, line, marker, circle, path, polygon)
 import Svg.Attributes exposing (..)
 
 
@@ -26,13 +26,13 @@ type alias Position =
 
 
 posX : Position -> Float
-posX ( x', _ ) =
-    x'
+posX ( x, _ ) =
+    x
 
 
 posY : Position -> Float
-posY ( _, y' ) =
-    y'
+posY ( _, y ) =
+    y
 
 
 aspectRatio : Tabletop -> Float
@@ -73,13 +73,13 @@ center table =
 distance : Position -> Position -> Inch
 distance ( x1, y1 ) ( x2, y2 ) =
     let
-        y' =
+        y =
             (y1 - y2) ^ 2
 
-        x' =
+        x =
             (x1 - x2) ^ 2
     in
-        sqrt (x' + y')
+        sqrt (x + y)
 
 
 positionFromDirection : Position -> Position -> Inch -> Position
@@ -88,17 +88,17 @@ positionFromDirection start end len =
         h =
             distance start end
 
-        x' =
+        x =
             (posX end) - (posX start)
 
-        y' =
+        y =
             (posY end) - (posY start)
 
         angle =
-            acos (y' / h)
+            acos (y / h)
 
         co =
-            if x' > 0 then
+            if x > 0 then
                 1
             else
                 -1
@@ -109,15 +109,15 @@ positionFromDirection start end len =
 
 
 angle : Position -> Position -> Float
-angle (startX, startY) (endX, endY) =
+angle ( startX, startY ) ( endX, endY ) =
     let
-        y' =
+        y =
             endY - startY
 
-        x' =
+        x =
             endX - startX
     in
-        atan2 y' x' |> (*) 180 |> (flip (/)) pi
+        atan2 y x |> (*) 180 |> (flip (/)) pi
 
 
 isWithinDistance : Inch -> Position -> Position -> Bool

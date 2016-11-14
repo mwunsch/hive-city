@@ -293,18 +293,18 @@ run model pos =
 view : Model -> msg -> Svg msg
 view model msg =
     let
-        x' =
+        modelX =
             model.position |> posX |> toString
 
-        y' =
+        modelY =
             model.position |> posY |> toString
 
         rotation =
             "rotate("
-                ++ String.join " " [ toString model.bearing, x', y' ]
+                ++ String.join " " [ toString model.bearing, modelX, modelY ]
                 ++ ")"
     in
-        text'
+        text_
             [ fontSize (Tabletop.millimeter 25 |> toString)
             , fontFamily "monospace"
             , textAnchor "middle"
@@ -314,8 +314,8 @@ view model msg =
                     "white"
                 else
                     "black"
-            , x x'
-            , y y'
+            , x modelX
+            , y modelY
             , onClickWithoutPropagation msg
             , Svg.Attributes.cursor "pointer"
             , transform rotation

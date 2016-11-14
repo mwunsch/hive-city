@@ -53,7 +53,7 @@ deselectAll player =
 
 getSelectedGangMember : Player -> Maybe Model
 getSelectedGangMember player =
-    player.selection `andThen` (flip Gang.get) player.gang
+    player.selection |> andThen ((flip Gang.get) player.gang)
 
 
 updateSelectedGangMember : Player -> (Model -> Model) -> Gang
@@ -70,7 +70,7 @@ updateSelectedGangMember player transform =
 
 getTargetedModel : Player -> Maybe Model
 getTargetedModel player =
-    player.target `andThen` (flip Gang.get) player.gang
+    player.target |> andThen ((flip Gang.get) player.gang)
 
 
 {-| A Player is always taking some Action (even just Awaiting
@@ -97,8 +97,10 @@ animation. Likely, this will become a `Cmd`.
 Note that an Instruction can be executed even when the Player is not
 explicitly taking some Action. The returned Task is parameterized with
 the Action that corresponds to the Instruction.
+
+As of Elm 0.18 `Task.perform` assumes a Task Never a
 -}
-execute : Instruction -> Player -> ( Player, Task Failure Action )
+execute : Instruction -> Player -> ( Player, Task Never Action )
 execute instruction player =
     case instruction of
         Moving fighter pos ->

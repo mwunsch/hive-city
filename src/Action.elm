@@ -105,7 +105,7 @@ viewControls phase fighter message =
             (\action ->
                 viewControl action (canModelTakeAction fighter action) (message action)
             )
-        |> text'
+        |> text_
             [ fontSize "2"
             , fontFamily "monospace"
             , alignmentBaseline "middle"

@@ -4,9 +4,8 @@ import Action exposing (Action)
 import Array
 import Gang exposing (Gang)
 import Html exposing (Html)
-import Html.App as App
 import Html.Events exposing (on, onClick)
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json
 import Keyboard
 import List exposing (map)
 import Maybe exposing (andThen)
@@ -24,9 +23,9 @@ import Utilities exposing (textNode, htmlAsSvg)
 import Window
 
 
-main : Program Never
+main : Program Never GameState Msg
 main =
-    App.program
+    Html.program
         { init = init
         , view = view
         , update = update
@@ -57,7 +56,7 @@ init : ( GameState, Cmd Msg )
 init =
     let
         table =
-            6 `Tabletop.by` 4
+            Tabletop.by 6 4
     in
         ( { player = Player.init table
           , tabletop = table
@@ -68,7 +67,7 @@ init =
           , contextMessage = Nothing
           }
         , Cmd.batch
-            [ Task.perform (always NoOp) Resize Window.width
+            [ Task.perform Resize Window.width
             , Random.generate Generate (Gang.positionedGenerator table)
             ]
         )
@@ -103,7 +102,7 @@ update msg game =
                             Player.execute (Player.Shooting fighter model weapon) game.player
                                 |> \( player, task ) ->
                                     ( { game | player = player }
-                                    , Task.perform (always NoOp) Complete task
+                                    , Task.perform Complete task
                                     )
 
                         Nothing ->
@@ -124,14 +123,14 @@ update msg game =
                                 Player.execute (Player.Moving fighter pos) game.player
                                     |> \( player, task ) ->
                                         ( { game | player = player }
-                                        , Task.perform (always NoOp) Complete task
+                                        , Task.perform Complete task
                                         )
 
                             Action.Run ->
                                 Player.execute (Player.Running fighter pos) game.player
                                     |> \( player, task ) ->
                                         ( { game | player = player }
-                                        , Task.perform (always NoOp) Complete task
+                                        , Task.perform Complete task
                                         )
 
                             _ ->
@@ -308,13 +307,13 @@ positionFromMouseCoords ( x, y ) { windowScale, offset } =
         transform a =
             toFloat a / windowScale
 
-        x' =
+        scaleX =
             transform x
 
-        y' =
+        scaleY =
             transform y - toFloat (offset // 2)
     in
-        ( x', y' )
+        ( scaleX, scaleY )
 
 
 
@@ -369,7 +368,7 @@ view game =
             in
                 Maybe.withDefault ( "white", currentTurn ) game.contextMessage
                     |> \( color, msg ) ->
-                        text'
+                        text_
                             [ y "-2.5"
                             , x "50%"
                             , fill color
@@ -389,7 +388,7 @@ view game =
                         Nothing ->
                             textNode "→"
             in
-                text'
+                text_
                     [ y "-2.5"
                     , x "65%"
                     , fill "red"
@@ -445,7 +444,7 @@ view game =
             [ svg
                 [ viewBox
                     ([ 0, negate letterbox, game.tabletop.width, game.tabletop.height + game.offset ]
-                        |> map toString
+                        |> List.map toString
                         |> join " "
                     )
                 , width (game.windowWidth |> toString)

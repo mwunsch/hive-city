@@ -103,6 +103,7 @@ update : Id -> (Maybe Model -> Maybe Model) -> Gang -> Gang
 update id transform (Gang params) =
     Gang { params | roster = (Dict.update id transform params.roster) }
 
+
 toList : Gang -> List Model
 toList (Gang { roster }) =
     Dict.values roster
@@ -131,23 +132,24 @@ map transform (Gang params) =
 generator : Generator Gang
 generator =
     Model.generator Model.Leader
-        `andThen`
+        |> andThen
             (\leader ->
                 Random.list 4 (Model.generator Model.Ganger)
                     |> Random.map ((::) leader)
                     |> Random.map fromList
             )
-        `andThen`
-            \(Gang gang) ->
+        |> andThen
+            (\(Gang gang) ->
                 uuid
                     |> Random.map (\id -> Gang { gang | id = id })
+            )
 
 
 positionedGenerator : Tabletop -> Generator Gang
 positionedGenerator table =
     generator
-        `andThen`
-            \(Gang gang) ->
+        |> andThen
+            (\(Gang gang) ->
                 let
                     fighters =
                         Dict.toList gang.roster
@@ -157,6 +159,7 @@ positionedGenerator table =
                             (List.map2 (\( id, fighter ) pos -> ( id, { fighter | position = pos } )) fighters)
                         |> Random.map (Dict.fromList)
                         |> Random.map (\fighters -> Gang { gang | roster = fighters })
+            )
 
 
 view : Gang -> (Model -> msg) -> Svg msg
