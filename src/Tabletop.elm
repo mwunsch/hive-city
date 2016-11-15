@@ -108,6 +108,17 @@ positionFromDirection start end len =
         )
 
 
+positionFromAngle : Position -> Float -> Inch -> Position
+positionFromAngle ( x, y ) angle len =
+    let
+        rad =
+            degrees angle
+    in
+        ( x + (cos rad * len)
+        , y + (sin rad * len)
+        )
+
+
 angle : Position -> Position -> Float
 angle ( startX, startY ) ( endX, endY ) =
     let
