@@ -183,8 +183,13 @@ viewMarker =
 
 
 transformTranslate : Position -> Svg.Attribute msg
-transformTranslate ( x, y ) =
-    List.map toString [ x, y ]
-        |> String.join ","
+transformTranslate pos =
+    positionToString pos
         |> (\str -> String.concat [ "translate(", str, ")" ])
         |> transform
+
+
+positionToString : Position -> String
+positionToString ( x, y ) =
+    List.map toString [ x, y ]
+        |> String.join ","
