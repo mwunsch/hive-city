@@ -179,6 +179,37 @@ viewMeasuringTape start end range =
             []
 
 
+viewArc : Position -> Float -> Inch -> Svg msg
+viewArc start angle len =
+    let
+        end : Position
+        end =
+            positionFromAngle start angle len
+
+        tangent =
+            tan (degrees 45)
+
+        pointA =
+            ( posX end + ((posY start - posY end |> negate) * tangent)
+            , posY end + ((posX start - posX end) * tangent)
+            )
+
+        pointB =
+            ( posX end + ((posY start - posY end) * tangent)
+            , posY end + ((posX start - posX end |> negate) * tangent)
+            )
+    in
+        polygon
+            [ points
+                (List.map (positionToString) [ start, pointA, pointB ]
+                    |> String.join " "
+                )
+            , fill "white"
+            , opacity "0.15"
+            ]
+            []
+
+
 viewMarker : Svg msg
 viewMarker =
     marker

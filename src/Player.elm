@@ -158,7 +158,7 @@ actionView player phase message fighter =
             Tabletop.viewMeasuringTape fighter.position player.movementIntention (fighter.remainingMove * 2)
 
         Shoot weapon ->
-            Tabletop.viewMeasuringTape fighter.position player.movementIntention (Weapons.maxRange weapon)
+            Tabletop.viewArc fighter.position fighter.bearing (Weapons.maxRange weapon)
 
         _ ->
             Action.unimplementedView player.action fighter
