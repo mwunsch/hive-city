@@ -215,16 +215,33 @@ TODO: Use an SVG Path to draw the arc.
 -}
 viewArc : Position -> Float -> Inch -> Svg msg
 viewArc start angle len =
-    polygon
-        [ points
-            ((ninetyDegreeArc start angle len)
-                |> (\( a, b, c ) -> List.map positionToString [ a, b, c ])
+    let
+        ( _, b, c ) =
+            ninetyDegreeArc start angle len
+
+        m =
+            b |> positionToString |> String.append "M"
+
+        a =
+            let
+                radius =
+                    [ 45, 45 ] |> List.map toString |> String.join (",")
+            in
+                [ radius, "0 0 1", positionToString c ]
+                    |> String.join " "
+                    |> String.append "A"
+
+        l =
+            [ positionToString c, positionToString start, "Z" ]
                 |> String.join " "
-            )
-        , fill "white"
-        , opacity "0.15"
-        ]
-        []
+                |> String.append "L"
+    in
+        Svg.path
+            [ d (String.join " " [ m, a, l ])
+            , fill "white"
+            , opacity "0.15"
+            ]
+            []
 
 
 viewMarker : Svg msg
