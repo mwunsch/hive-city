@@ -4,6 +4,7 @@ import Random exposing (Generator)
 import String
 import Svg exposing (Svg, rect, g, line, marker, circle, path, polygon)
 import Svg.Attributes exposing (..)
+import Tuple
 
 
 {-| The Tabletop module exposes types and functions related to the
@@ -26,13 +27,13 @@ type alias Position =
 
 
 posX : Position -> Float
-posX ( x, _ ) =
-    x
+posX =
+    Tuple.first
 
 
 posY : Position -> Float
-posY ( _, y ) =
-    y
+posY =
+    Tuple.second
 
 
 aspectRatio : Tabletop -> Float
@@ -108,6 +109,24 @@ positionFromDirection start end len =
         )
 
 
+{-| Finds the angle between two Positions in *degrees*.
+
+-}
+angle : Position -> Position -> Float
+angle ( startX, startY ) ( endX, endY ) =
+    let
+        y =
+            endY - startY
+
+        x =
+            endX - startX
+    in
+        atan2 y x |> (*) 180 |> (flip (/)) pi
+
+
+{-| Given a Position, an angle (in degrees), and a distance, find the
+new Position.
+-}
 positionFromAngle : Position -> Float -> Inch -> Position
 positionFromAngle ( x, y ) angle len =
     let
@@ -119,16 +138,27 @@ positionFromAngle ( x, y ) angle len =
         )
 
 
-angle : Position -> Position -> Float
-angle ( startX, startY ) ( endX, endY ) =
+{-| Given a starting point, and angle, and a distance, draw a 90
+degree arc from the starting point to the distance.
+-}
+ninetyDegreeArc : Position -> Float -> Inch -> ( Position, Position, Position )
+ninetyDegreeArc start angle len =
     let
-        y =
-            endY - startY
+        end : Position
+        end =
+            positionFromAngle start angle len
 
-        x =
-            endX - startX
+        tangent =
+            tan (degrees 45)
     in
-        atan2 y x |> (*) 180 |> (flip (/)) pi
+        ( start
+        , ( posX end + ((posY start - posY end |> negate) * tangent)
+          , posY end + ((posX start - posX end) * tangent)
+          )
+        , ( posX end + ((posY start - posY end) * tangent)
+          , posY end + ((posX start - posX end |> negate) * tangent)
+          )
+        )
 
 
 isWithinDistance : Inch -> Position -> Position -> Bool
@@ -179,35 +209,22 @@ viewMeasuringTape start end range =
             []
 
 
+{-| Draw an arc of sight for a weapon.
+
+TODO: Use an SVG Path to draw the arc.
+-}
 viewArc : Position -> Float -> Inch -> Svg msg
 viewArc start angle len =
-    let
-        end : Position
-        end =
-            positionFromAngle start angle len
-
-        tangent =
-            tan (degrees 45)
-
-        pointA =
-            ( posX end + ((posY start - posY end |> negate) * tangent)
-            , posY end + ((posX start - posX end) * tangent)
+    polygon
+        [ points
+            ((ninetyDegreeArc start angle len)
+                |> (\( a, b, c ) -> List.map positionToString [ a, b, c ])
+                |> String.join " "
             )
-
-        pointB =
-            ( posX end + ((posY start - posY end) * tangent)
-            , posY end + ((posX start - posX end |> negate) * tangent)
-            )
-    in
-        polygon
-            [ points
-                (List.map (positionToString) [ start, pointA, pointB ]
-                    |> String.join " "
-                )
-            , fill "white"
-            , opacity "0.15"
-            ]
-            []
+        , fill "white"
+        , opacity "0.15"
+        ]
+        []
 
 
 viewMarker : Svg msg
