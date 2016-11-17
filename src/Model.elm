@@ -290,6 +290,18 @@ run model pos =
             model
 
 
+{-| TODO: Not complete. We need to see if these models are inside the
+arc of sight.
+-}
+withinShootingRange : List Model -> Model -> Weapon -> List Model
+withinShootingRange models fighter weapon =
+    models
+        |> List.filter
+            (\{ position } ->
+                Tabletop.distance position fighter.position <= Weapons.maxRange weapon
+            )
+
+
 view : Model -> msg -> Svg msg
 view model msg =
     let
