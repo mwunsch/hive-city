@@ -158,8 +158,15 @@ update msg game =
                         Action.Run ->
                             Just ( "lightblue", "Click to run to a point" )
 
-                        Action.Shoot _ ->
-                            Just ( "red", "Select a target" )
+                        Action.Shoot weapon ->
+                            let
+                                closest =
+                                    Player.getSelectedGangMember game.player
+                                        |> Maybe.map (Model.withinShootingRange (Gang.toList game.player.gang) weapon)
+                                        |> Maybe.withDefault []
+                                        |> List.map (\{ id } -> Debug.log "Closest" id)
+                            in
+                                Just ( "red", "Select a target" )
 
                         _ ->
                             Nothing

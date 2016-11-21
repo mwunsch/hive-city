@@ -290,16 +290,31 @@ run model pos =
             model
 
 
-{-| TODO: Not complete. We need to see if these models are inside the
-arc of sight.
+{-| TODO: This is wrong
 -}
-withinShootingRange : List Model -> Model -> Weapon -> List Model
-withinShootingRange models fighter weapon =
-    models
-        |> List.filter
-            (\{ position } ->
-                Tabletop.distance position fighter.position <= Weapons.maxRange weapon
-            )
+withinShootingRange : List Model -> Weapon -> Model -> List Model
+withinShootingRange models weapon fighter =
+    let
+        isWithinArc : Position -> Bool
+        isWithinArc position =
+            let
+                ( _, start, end ) =
+                    Tabletop.ninetyDegreeArc fighter.position fighter.bearing (Weapons.maxRange weapon)
+
+                ( a, b, c ) =
+                    Debug.log "Angles"
+                        ( toPolar start |> Tuple.second
+                        , toPolar position |> Tuple.second
+                        , toPolar end |> Tuple.second
+                        )
+            in
+                Debug.log "arc"
+                    ((Tabletop.distance position fighter.position <= Weapons.maxRange weapon)
+                        && (a <= b && b <= c)
+                    )
+    in
+        models
+            |> List.filter (\{ position } -> isWithinArc position)
 
 
 view : Model -> msg -> Svg msg
