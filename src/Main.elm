@@ -330,11 +330,19 @@ positionFromMouseCoords ( x, y ) { windowScale, offset } =
 
 subscriptions : GameState -> Sub Msg
 subscriptions game =
-    Sub.batch
-        [ Window.resizes (\size -> Resize size.width)
-        , Mouse.moves Hover
-        , Keyboard.presses KeyPress
-        ]
+    let
+        sublist =
+            [ Window.resizes (\size -> Resize size.width)
+            , Keyboard.presses KeyPress
+            ]
+    in
+        Sub.batch <|
+            case Turn.phase game.turn of
+                Movement ->
+                    Mouse.moves Hover :: sublist
+
+                _ ->
+                    sublist
 
 
 
