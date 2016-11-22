@@ -240,25 +240,25 @@ viewMeasuringTape start end range =
 
 -}
 viewArc : Position -> Float -> Inch -> Svg msg
-viewArc start angle len =
+viewArc origin angle len =
     let
-        ( _, b, c ) =
-            ninetyDegreeArc start angle len
+        ( _, start, end ) =
+            ninetyDegreeArc origin angle len
 
         m =
-            b |> positionToString |> String.append "M"
+            start |> positionToString |> String.append "M"
 
         a =
             let
                 radius =
                     [ len, len ] |> List.map toString |> String.join (",")
             in
-                [ radius, "0 0 1", positionToString c ]
+                [ radius, "0 0 1", positionToString end ]
                     |> String.join " "
                     |> String.append "A"
 
         l =
-            [ positionToString c, positionToString start, "Z" ]
+            [ positionToString end, positionToString origin, "Z" ]
                 |> String.join " "
                 |> String.append "L"
     in
