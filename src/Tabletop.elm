@@ -251,7 +251,7 @@ viewArc start angle len =
         a =
             let
                 radius =
-                    [ 45, 45 ] |> List.map toString |> String.join (",")
+                    [ len, len ] |> List.map toString |> String.join (",")
             in
                 [ radius, "0 0 1", positionToString c ]
                     |> String.join " "
