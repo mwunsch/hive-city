@@ -109,7 +109,7 @@ positionFromDirection start end len =
         )
 
 
-{-| Finds the angle between two Positions in *degrees*.
+{-| Finds the angle between two Positions in *radians*.
 
 -}
 angle : Position -> Position -> Float
@@ -121,49 +121,76 @@ angle ( startX, startY ) ( endX, endY ) =
         x =
             endX - startX
     in
-        atan2 y x |> (*) 180 |> (flip (/)) pi
+        atan2 y x
 
 
-{-| Given a Position, an angle (in degrees), and a distance, find the
+{-| Given a Position, an angle, and a distance, find the
 new Position.
 -}
 positionFromAngle : Position -> Float -> Inch -> Position
 positionFromAngle ( x, y ) angle len =
-    let
-        rad =
-            degrees angle
-    in
-        ( x + (cos rad * len)
-        , y + (sin rad * len)
-        )
+    ( x + (cos angle * len)
+    , y + (sin angle * len)
+    )
+
+
+type alias Arc =
+    ( Position, Position, Position )
 
 
 {-| Given a starting point, and angle, and a distance, draw a 90
 degree arc from the starting point to the distance.
--}
-ninetyDegreeArc : Position -> Float -> Inch -> ( Position, Position, Position )
-ninetyDegreeArc start angle len =
-    let
-        end : Position
-        end =
-            positionFromAngle start angle len
 
-        tangent =
-            tan (degrees 45)
-    in
-        ( start
-        , ( posX end + ((posY start - posY end |> negate) * tangent)
-          , posY end + ((posX start - posX end) * tangent)
-          )
-        , ( posX end + ((posY start - posY end) * tangent)
-          , posY end + ((posX start - posX end |> negate) * tangent)
-          )
-        )
+-}
+ninetyDegreeArc : Position -> Float -> Inch -> Arc
+ninetyDegreeArc origin angle len =
+    ( origin
+    , ( len, angle - (degrees 45) ) |> fromPolar |> makeAbsolute origin
+    , ( len, angle + (degrees 45) ) |> fromPolar |> makeAbsolute origin
+    )
 
 
 isWithinDistance : Inch -> Position -> Position -> Bool
 isWithinDistance r start end =
     distance start end < r
+
+
+translate : Position -> Position -> Position
+translate ( originX, originY ) ( absoluteX, absoluteY ) =
+    ( absoluteX - originX, absoluteY - originY )
+
+
+makeAbsolute : Position -> Position -> Position
+makeAbsolute ( originX, originY ) ( relativeX, relativeY ) =
+    ( relativeX + originX, relativeY + originY )
+
+
+isWithinArc : Position -> Arc -> Bool
+isWithinArc position ( origin, start, end ) =
+    let
+        -- i'm using the greek letter θ because that's what all the
+        -- math websites say means "angle"
+        theta : Position -> Float
+        theta coord =
+            translate origin coord
+                |> toPolar
+                |> Tuple.second
+
+        -- a, b, c are the angles for the arc start, the point we're
+        -- checking, and the end
+        ( a, b, c ) =
+            ( theta start
+            , theta position
+            , theta end
+            )
+    in
+        if a < c then
+            (a <= b) && (b <= c)
+        else
+            -- the end wrapped around the 360° point so either the
+            -- starting angle is less than the ray or the ray is less
+            -- than the end
+            xor (a <= b) (b <= c)
 
 
 view : Tabletop -> Svg msg
@@ -211,7 +238,6 @@ viewMeasuringTape start end range =
 
 {-| Draw an arc of sight for a weapon.
 
-TODO: Use an SVG Path to draw the arc.
 -}
 viewArc : Position -> Float -> Inch -> Svg msg
 viewArc start angle len =

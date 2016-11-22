@@ -164,7 +164,8 @@ update msg game =
                                     Player.getSelectedGangMember game.player
                                         |> Maybe.map (Model.withinShootingRange (Gang.toList game.player.gang) weapon)
                                         |> Maybe.withDefault []
-                                        |> List.map (\{ id } -> Debug.log "Closest" id)
+                                        |> List.map (.id)
+                                        |> Debug.log "inside arc"
                             in
                                 Just ( "red", "Select a target" )
 

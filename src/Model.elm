@@ -290,31 +290,26 @@ run model pos =
             model
 
 
-{-| TODO: This is wrong
+{-| A Model is within shooting range if they are:
+
++ Not the shooter
++ Within the maximum range of the weapon
++ They are within a ninety degree arc of sight of the shooter
+
 -}
 withinShootingRange : List Model -> Weapon -> Model -> List Model
 withinShootingRange models weapon fighter =
     let
-        isWithinArc : Position -> Bool
-        isWithinArc position =
-            let
-                ( _, start, end ) =
-                    Tabletop.ninetyDegreeArc fighter.position fighter.bearing (Weapons.maxRange weapon)
+        range =
+            Weapons.maxRange weapon
 
-                ( a, b, c ) =
-                    Debug.log "Angles"
-                        ( toPolar start |> Tuple.second
-                        , toPolar position |> Tuple.second
-                        , toPolar end |> Tuple.second
-                        )
-            in
-                Debug.log "arc"
-                    ((Tabletop.distance position fighter.position <= Weapons.maxRange weapon)
-                        && (a <= b && b <= c)
-                    )
+        arc =
+            Tabletop.ninetyDegreeArc fighter.position fighter.bearing range
     in
         models
-            |> List.filter (\{ position } -> isWithinArc position)
+            |> List.filter ((/=) fighter)
+            |> List.filter (\{ position } -> Tabletop.isWithinDistance range fighter.position position)
+            |> List.filter (\{ position } -> Tabletop.isWithinArc position arc)
 
 
 view : Model -> msg -> Svg msg
@@ -326,9 +321,12 @@ view model msg =
         modelY =
             model.position |> posY |> toString
 
+        bearingDegrees =
+            model.bearing |> (*) 180 |> (flip (/)) pi
+
         rotation =
             "rotate("
-                ++ String.join " " [ toString model.bearing, modelX, modelY ]
+                ++ String.join " " [ toString bearingDegrees, modelX, modelY ]
                 ++ ")"
     in
         text_
