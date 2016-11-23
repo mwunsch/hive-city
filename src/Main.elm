@@ -148,36 +148,55 @@ update msg game =
                     update NoOp game
 
         Command action ->
-            let
-                message : Maybe ContextMessage
-                message =
-                    case action of
-                        Action.Move ->
-                            Just ( "lightblue", "Click to move your dude" )
+            case action of
+                Action.Move ->
+                    ( { game
+                        | contextMessage = Just ( "lightblue", "Click to move your dude" )
+                        , player = game.player |> \p -> { p | action = action }
+                      }
+                    , Cmd.none
+                    )
 
-                        Action.Run ->
-                            Just ( "lightblue", "Click to run to a point" )
+                Action.Run ->
+                    ( { game
+                        | contextMessage = Just ( "lightblue", "Click to run to a point" )
+                        , player = game.player |> \p -> { p | action = action }
+                      }
+                    , Cmd.none
+                    )
 
-                        Action.Shoot weapon ->
-                            let
-                                closest =
-                                    Player.getSelectedGangMember game.player
-                                        |> Maybe.map (Model.withinShootingRange (Gang.toList game.player.gang) weapon)
-                                        |> Maybe.withDefault []
-                                        |> List.map (.id)
-                                        |> Debug.log "inside arc"
-                            in
-                                Just ( "red", "Select a target" )
+                Action.Shoot weapon ->
+                    let
+                        closest =
+                            Player.getSelectedGangMember game.player
+                                |> Maybe.map (Model.withinShootingRange (Gang.toList game.player.gang) weapon)
+                                |> Maybe.withDefault []
+                                |> List.head
+                    in
+                        case closest of
+                            Just _ ->
+                                ( { game
+                                    | contextMessage = Just ( "red", "Target acquired" )
+                                    , player = game.player |> \p -> { p | action = action }
+                                  }
+                                , Cmd.none
+                                )
 
-                        _ ->
-                            Nothing
-            in
-                ( { game
-                    | player = game.player |> \p -> { p | action = action }
-                    , contextMessage = message
-                  }
-                , Cmd.none
-                )
+                            Nothing ->
+                                ( { game
+                                    | contextMessage = Just ( "red", "No target in range!" )
+                                    , player = game.player |> \p -> { p | action = action }
+                                  }
+                                , Cmd.none
+                                )
+
+                _ ->
+                    ( { game
+                        | contextMessage = Nothing
+                        , player = game.player |> \p -> { p | action = action }
+                      }
+                    , Cmd.none
+                    )
 
         Complete action ->
             let

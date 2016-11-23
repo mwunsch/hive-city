@@ -296,6 +296,8 @@ run model pos =
 + Within the maximum range of the weapon
 + They are within a ninety degree arc of sight of the shooter
 
+The result is sorted by distance to the shooter.
+
 -}
 withinShootingRange : List Model -> Weapon -> Model -> List Model
 withinShootingRange models weapon fighter =
@@ -310,6 +312,7 @@ withinShootingRange models weapon fighter =
             |> List.filter ((/=) fighter)
             |> List.filter (\{ position } -> Tabletop.isWithinDistance range fighter.position position)
             |> List.filter (\{ position } -> Tabletop.isWithinArc position arc)
+            |> List.sortBy (\{ position } -> Tabletop.distance fighter.position position)
 
 
 view : Model -> msg -> Svg msg
