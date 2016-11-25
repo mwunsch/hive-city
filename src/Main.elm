@@ -152,29 +152,28 @@ update msg game =
                     )
 
                 Action.Shoot weapon ->
-                    let
-                        closest =
-                            Player.getSelectedGangMember game.player
-                                |> Maybe.map (Model.withinShootingRange (Gang.toList game.player.gang) weapon)
-                                |> Maybe.withDefault []
-                                |> List.head
-                    in
-                        case closest of
-                            Just fighter ->
-                                ( { game
-                                    | contextMessage = Just ( "red", "Target acquired" )
-                                    , player = game.player |> \p -> { p | action = action, target = Just fighter.id }
-                                  }
-                                , Cmd.none
-                                )
+                    case Player.getClosestModelInWeaponRange game.player weapon of
+                        Just fighter ->
+                            ( { game
+                                | contextMessage = Just ( "red", "Target acquired" )
+                                , player =
+                                    game.player
+                                        |> \p ->
+                                            { p
+                                                | action = action
+                                                , target = Just fighter.id
+                                            }
+                              }
+                            , Cmd.none
+                            )
 
-                            Nothing ->
-                                ( { game
-                                    | contextMessage = Just ( "red", "No target in range!" )
-                                    , player = game.player |> \p -> { p | action = action }
-                                  }
-                                , Cmd.none
-                                )
+                        Nothing ->
+                            ( { game
+                                | contextMessage = Just ( "red", "No target in range!" )
+                                , player = game.player |> \p -> { p | action = action }
+                              }
+                            , Cmd.none
+                            )
 
                 _ ->
                     ( { game

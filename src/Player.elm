@@ -73,6 +73,14 @@ getTargetedModel player =
     player.target |> andThen ((flip Gang.get) player.gang)
 
 
+getClosestModelInWeaponRange : Player -> Weapon -> Maybe Model
+getClosestModelInWeaponRange player weapon =
+    getSelectedGangMember player
+        |> Maybe.map (Model.withinShootingRange (Gang.toList player.gang) weapon)
+        |> Maybe.withDefault []
+        |> List.head
+
+
 {-| A Player is always taking some Action (even just Awaiting
 input). The `Instruction` type describes the execution of that action,
 along with what is necessary to execute it.
