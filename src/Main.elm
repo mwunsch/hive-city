@@ -95,21 +95,7 @@ update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
         Select model ->
-            case game.player.action of
-                Action.Shoot weapon ->
-                    case Player.getSelectedGangMember game.player of
-                        Just fighter ->
-                            Player.execute (Player.Shooting fighter model weapon) game.player
-                                |> \( player, task ) ->
-                                    ( { game | player = player }
-                                    , Task.perform Complete task
-                                    )
-
-                        Nothing ->
-                            update NoOp game
-
-                _ ->
-                    ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
+            ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
 
         Click { x, y } ->
             case Player.getSelectedGangMember game.player of
@@ -174,10 +160,10 @@ update msg game =
                                 |> List.head
                     in
                         case closest of
-                            Just _ ->
+                            Just fighter ->
                                 ( { game
                                     | contextMessage = Just ( "red", "Target acquired" )
-                                    , player = game.player |> \p -> { p | action = action }
+                                    , player = game.player |> \p -> { p | action = action, target = Just fighter.id }
                                   }
                                 , Cmd.none
                                 )
