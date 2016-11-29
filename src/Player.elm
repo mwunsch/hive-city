@@ -96,20 +96,18 @@ type Failure
     = FailedToMove Model
 
 
-{-| The `execute` function executes the Instruction, and returns a pair of
-an updated Player and a `Task`.
-
-Why a Task? It's a stub so that we can figure out Dice rolls and
-animation. Likely, this will become a `Cmd`.
+{-| The `execute` function executes the Instruction, and returns a
+pair of an updated Player and a `Cmd a`.
 
 Note that an Instruction can be executed even when the Player is not
-explicitly taking some Action. The returned Task is parameterized with
+explicitly taking some Action. The returned Cmd is parameterized with
 the Action that corresponds to the Instruction.
 
-As of Elm 0.18 `Task.perform` assumes a Task Never a
+TODO: Have the Cmd be parameterized with both the Action and a Result.
+
 -}
-execute : Instruction -> Player -> ( Player, Task Never Action )
-execute instruction player =
+execute : Instruction -> Player -> (Action -> msg) -> ( Player, Cmd msg )
+execute instruction player msg =
     case instruction of
         Moving fighter pos ->
             let
@@ -123,17 +121,17 @@ execute instruction player =
                             model
             in
                 ( { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
-                , Task.succeed Move
+                , Task.perform msg (Task.succeed Move)
                 )
 
         Running fighter pos ->
             ( { player | gang = Gang.update fighter.id (Maybe.map ((flip Model.run) pos)) player.gang }
-            , Task.succeed Run
+            , Task.perform msg (Task.succeed Run)
             )
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , Task.succeed (Shoot weapon)
+            , Task.perform msg (Task.succeed (Shoot weapon))
             )
 
 
