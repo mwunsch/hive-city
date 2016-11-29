@@ -1,6 +1,6 @@
 module Dice exposing (..)
 
-import Random exposing (Generator)
+import Random exposing (Generator, generate)
 import List
 
 
@@ -26,6 +26,11 @@ d6 num =
     num |> d 6
 
 
+oneD6 : Dice
+oneD6 =
+    d6 1
+
+
 {-| From the rulebook:
 
 > There isn’t actually any such thing as a 3- sided dice, instead a D3
@@ -36,3 +41,8 @@ d3 : Int -> Dice
 d3 num =
     d6 num
         |> Random.map (List.map (toFloat >> (*) 0.5 >> ceiling))
+
+
+roll : (List Int -> msg) -> Dice -> Cmd msg
+roll =
+    generate
