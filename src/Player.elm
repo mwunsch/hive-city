@@ -1,6 +1,7 @@
 module Player exposing (..)
 
 import Action exposing (Action(..))
+import Dice exposing (Dice, oneD6)
 import Gang exposing (Gang)
 import Maybe exposing (andThen)
 import Model exposing (Model)
@@ -131,7 +132,7 @@ execute instruction player msg =
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , Task.perform msg (Task.succeed (Shoot weapon))
+            , Dice.roll (\_ -> msg (Shoot weapon)) oneD6
             )
 
 
