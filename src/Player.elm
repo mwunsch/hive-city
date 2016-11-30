@@ -1,6 +1,6 @@
 module Player exposing (..)
 
-import Action exposing (Action(..), Failure)
+import Action exposing (Action(..), Failure(..))
 import Dice exposing (Dice, oneD6)
 import Gang exposing (Gang)
 import Maybe exposing (andThen)
@@ -129,7 +129,7 @@ execute instruction player =
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , Dice.roll (\_ -> Ok (Shoot weapon)) oneD6
+            , oneD6 |> Dice.roll (Model.shoot attacker weapon target >> Weapons.toResult MissedShot (Shoot weapon))
             )
 
 

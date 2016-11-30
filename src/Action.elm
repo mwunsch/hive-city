@@ -28,8 +28,8 @@ type Action
 
 
 type Failure
-    = FailedToMove Model Action
-    | MissedShot Action
+    = FailedToMove
+    | MissedShot
 
 
 select : Phase -> Model -> List Action

@@ -306,7 +306,7 @@ shoot shooter weapon target dice =
             List.sum dice
 
         bs =
-            attacker.profile.ballisticSkill
+            shooter.profile.ballisticSkill
     in
         if roll <= 1 then
             Miss
