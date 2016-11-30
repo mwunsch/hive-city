@@ -1,6 +1,6 @@
 module Player exposing (..)
 
-import Action exposing (Action(..))
+import Action exposing (Action(..), Failure)
 import Dice exposing (Dice, oneD6)
 import Gang exposing (Gang)
 import Maybe exposing (andThen)
@@ -93,22 +93,19 @@ type Instruction
     | Shooting Model Model Weapon
 
 
-type Failure
-    = FailedToMove Model
-
-
 {-| The `execute` function executes the Instruction, and returns a
-pair of an updated Player and a `Cmd a`.
+pair of an updated Player and a `Cmd (Result Failure Action)`.
 
 Note that an Instruction can be executed even when the Player is not
 explicitly taking some Action. The returned Cmd is parameterized with
 the Action that corresponds to the Instruction.
 
-TODO: Have the Cmd be parameterized with both the Action and a Result.
+The caller of execute (likely the main `update` loop, is assumed to
+use the `Tuple.map*` functions to massage the returned pair.
 
 -}
-execute : Instruction -> Player -> (Action -> msg) -> ( Player, Cmd msg )
-execute instruction player msg =
+execute : Instruction -> Player -> ( Player, Cmd (Result Failure Action) )
+execute instruction player =
     case instruction of
         Moving fighter pos ->
             let
@@ -122,17 +119,17 @@ execute instruction player msg =
                             model
             in
                 ( { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
-                , Task.perform msg (Task.succeed Move)
+                , Task.perform Ok (Task.succeed Move)
                 )
 
         Running fighter pos ->
             ( { player | gang = Gang.update fighter.id (Maybe.map ((flip Model.run) pos)) player.gang }
-            , Task.perform msg (Task.succeed Run)
+            , Task.perform Ok (Task.succeed Run)
             )
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , Dice.roll (\_ -> msg (Shoot weapon)) oneD6
+            , Dice.roll (\_ -> Ok (Shoot weapon)) oneD6
             )
 
 

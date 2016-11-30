@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Action exposing (Action)
+import Action exposing (Action, Failure)
 import Array
 import Gang exposing (Gang)
 import Html exposing (Html)
@@ -81,7 +81,7 @@ type Msg
     = Select Model
     | Click Mouse.Position
     | Command Action
-    | Complete Action
+    | Complete (Result Failure Action)
     | Advance
     | Hover Mouse.Position
     | KeyPress Keyboard.KeyCode
@@ -106,12 +106,14 @@ update msg game =
                     in
                         case game.player.action of
                             Action.Move ->
-                                Player.execute (Player.Moving fighter pos) game.player Complete
+                                Player.execute (Player.Moving fighter pos) game.player
                                     |> Tuple.mapFirst (\p -> { game | player = p })
+                                    |> Tuple.mapSecond (Cmd.map Complete)
 
                             Action.Run ->
-                                Player.execute (Player.Running fighter pos) game.player Complete
+                                Player.execute (Player.Running fighter pos) game.player
                                     |> Tuple.mapFirst (\p -> { game | player = p })
+                                    |> Tuple.mapSecond (Cmd.map Complete)
 
                             _ ->
                                 if Tabletop.isWithinDistance 2 fighter.position pos then
@@ -177,7 +179,7 @@ update msg game =
                     , Cmd.none
                     )
 
-        Complete action ->
+        Complete actionResult ->
             let
                 updateGame : GameState
                 updateGame =

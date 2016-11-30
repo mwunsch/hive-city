@@ -27,6 +27,11 @@ type Action
     | Fight
 
 
+type Failure
+    = FailedToMove Model Action
+    | MissedShot Action
+
+
 select : Phase -> Model -> List Action
 select phase fighter =
     case phase of
