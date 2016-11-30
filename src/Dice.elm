@@ -4,8 +4,12 @@ import Random exposing (Generator, generate)
 import List
 
 
+type alias Die =
+    Int
+
+
 type alias Dice =
-    Generator (List Int)
+    Generator (List Die)
 
 
 {-| The `d` function is a constructor function for dice. Like
@@ -43,6 +47,6 @@ d3 num =
         |> Random.map (List.map (toFloat >> (*) 0.5 >> ceiling))
 
 
-roll : (List Int -> msg) -> Dice -> Cmd msg
+roll : (List Die -> msg) -> Dice -> Cmd msg
 roll =
     generate

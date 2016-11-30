@@ -16,7 +16,9 @@ From the rulebook:
 
 -}
 
+import Dice exposing (Die)
 import Html exposing (Html, table, th, td, tr, colgroup, col)
+import List
 import Random exposing (Generator)
 import String
 import Svg exposing (..)
@@ -24,7 +26,7 @@ import Svg.Attributes exposing (..)
 import Tabletop exposing (Position, Inch, posX, posY)
 import Utilities exposing (textNode, onClickWithoutPropagation)
 import Uuid exposing (Uuid, uuid)
-import Weapons exposing (Weapon, knife, autogun, autopistol)
+import Weapons exposing (Weapon, Shot(..), knife, autogun, autopistol)
 
 
 type alias Model =
@@ -288,6 +290,30 @@ run model pos =
             { model | position = maxPosition, remainingMove = 0 }
         else
             model
+
+
+{-| Resolving whether a shot hits a target. The shooter's ballistic
+skill determines if it's a hit.
+
+TODO: Measure the distance between the shooter and the target and
+determine how range modifiers affect the outcome.
+
+-}
+shoot : Model -> Weapon -> Model -> List Die -> Shot
+shoot shooter weapon target dice =
+    let
+        roll =
+            List.sum dice
+
+        bs =
+            attacker.profile.ballisticSkill
+    in
+        if roll <= 1 then
+            Miss
+        else if bs + roll > 6 then
+            Hit
+        else
+            Miss
 
 
 {-| A Model is within shooting range if they are:

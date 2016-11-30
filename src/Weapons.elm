@@ -1,6 +1,5 @@
 module Weapons exposing (..)
 
-import List
 import Tabletop exposing (Inch)
 import Either exposing (Either(..))
 
@@ -23,6 +22,21 @@ type alias Profile =
     , ammoRoll : Maybe Int
     , icon : String
     }
+
+
+type Shot
+    = Hit
+    | Miss
+
+
+toResult : err -> ok -> Shot -> Result err ok
+toResult err ok shot =
+    case shot of
+        Hit ->
+            Ok ok
+
+        Miss ->
+            Err err
 
 
 profile : Weapon -> Profile
@@ -59,6 +73,7 @@ type alias ShortRange =
 
 type alias LongRange =
     ( Inch, Inch )
+
 
 maxRange : Weapon -> Inch
 maxRange weapon =
@@ -116,7 +131,7 @@ knife =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Nothing
-        , icon = "\x1f5e1"
+        , icon = "🗡"
         }
 
 
@@ -129,7 +144,7 @@ autopistol =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Just 4
-        , icon = "\x1f52b"
+        , icon = "🔫"
         }
 
 
@@ -142,5 +157,5 @@ autogun =
         , damage = 1
         , saveModifier = asUser
         , ammoRoll = Just 4
-        , icon = "\x1f529"
+        , icon = "🔩"
         }
