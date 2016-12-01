@@ -1,7 +1,10 @@
 module Dice exposing (..)
 
-import Random exposing (Generator, generate)
 import List
+import Random exposing (Generator, generate)
+import Svg exposing (Svg, text_, g)
+import Svg.Attributes exposing (..)
+import Utilities exposing (onClickWithoutPropagation, textNode)
 
 
 type alias Die =
@@ -50,3 +53,15 @@ d3 num =
 roll : (List Die -> msg) -> Dice -> Cmd msg
 roll =
     generate
+
+
+viewRoll : Int -> Int -> String -> msg -> Svg msg
+viewRoll num val mod msg =
+    text_
+        [ fontSize "2"
+        , alignmentBaseline "middle"
+        , textAnchor "start"
+        , onClickWithoutPropagation msg
+        , cursor "pointer"
+        ]
+        (textNode "🎲")
