@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Action exposing (Action, Failure)
 import Array
+import Dice
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.Events exposing (on, onClick)
@@ -11,7 +12,7 @@ import List exposing (map)
 import Maybe exposing (andThen)
 import Model exposing (Model)
 import Mouse
-import Player exposing (Player)
+import Player exposing (Player, Instruction(..), DiceRoll)
 import Random
 import String exposing (join)
 import Svg exposing (..)
@@ -45,6 +46,7 @@ type alias GameState =
     , offset : Int
     , turn : Turn
     , contextMessage : Maybe ContextMessage
+    , rolling : Maybe DiceRoll
     }
 
 
@@ -65,6 +67,7 @@ init =
           , offset = 10
           , turn = Turn.init
           , contextMessage = Nothing
+          , rolling = Nothing
           }
         , Cmd.batch
             [ Task.perform Resize Window.width
@@ -81,6 +84,7 @@ type Msg
     = Select Model
     | Click Mouse.Position
     | Command Action
+    | Roll Instruction
     | Complete (Result Failure Action)
     | Advance
     | Hover Mouse.Position
@@ -148,28 +152,32 @@ update msg game =
                     )
 
                 Action.Shoot weapon ->
-                    case Player.getClosestModelInWeaponRange game.player weapon of
-                        Just fighter ->
-                            ( { game
-                                | contextMessage = Just ( "red", "Target acquired" )
-                                , player =
-                                    game.player
-                                        |> \p ->
-                                            { p
-                                                | action = action
-                                                , target = Just fighter.id
-                                            }
-                              }
-                            , Cmd.none
-                            )
+                    let
+                        attackerAndTarget =
+                            Player.getSelectedGangMember game.player
+                                |> andThen
+                                    (\shooter ->
+                                        Player.getClosestModelInWeaponRange game.player weapon
+                                            |> Maybe.map ((,) shooter)
+                                    )
+                    in
+                        case attackerAndTarget of
+                            Just ( attacker, target ) ->
+                                ( { game
+                                    | contextMessage = Just ( "red", "Target acquired" )
+                                    , rolling = Just ( 1, 6, Player.Shooting attacker target weapon )
+                                    , player = game.player |> \p -> { p | action = action }
+                                  }
+                                , Cmd.none
+                                )
 
-                        Nothing ->
-                            ( { game
-                                | contextMessage = Just ( "red", "No target in range!" )
-                                , player = game.player |> \p -> { p | action = action }
-                              }
-                            , Cmd.none
-                            )
+                            Nothing ->
+                                ( { game
+                                    | contextMessage = Just ( "red", "No target in range!" )
+                                    , player = game.player |> \p -> { p | action = action }
+                                  }
+                                , Cmd.none
+                                )
 
                 _ ->
                     ( { game
@@ -178,6 +186,11 @@ update msg game =
                       }
                     , Cmd.none
                     )
+
+        Roll instruction ->
+            Player.execute instruction game.player
+                |> Tuple.mapFirst (\p -> { game | player = p, rolling = Nothing })
+                |> Tuple.mapSecond (Cmd.map Complete)
 
         Complete actionResult ->
             let
@@ -437,10 +450,15 @@ view game =
             )
 
         controls =
-            Player.getSelectedGangMember game.player
-                |> Maybe.map (\fighter -> Action.viewControls (Turn.phase game.turn) fighter Command)
+            game.rolling
+                |> Maybe.map (\( num, val, instruction ) -> Dice.viewRoll num val "" <| Roll instruction)
                 |> Maybe.map (List.repeat 1)
-                |> Maybe.withDefault []
+                |> Maybe.withDefault
+                    (Player.getSelectedGangMember game.player
+                        |> Maybe.map (\fighter -> Action.viewControls (Turn.phase game.turn) fighter Command)
+                        |> Maybe.map (List.repeat 1)
+                        |> Maybe.withDefault []
+                    )
                 |> g
                     [ Tabletop.transformTranslate controlArea
                     , class "controls"
