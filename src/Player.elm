@@ -93,6 +93,10 @@ type Instruction
     | Shooting Model Model Weapon
 
 
+type alias DiceRoll =
+    ( Int, Int, Instruction )
+
+
 {-| The `execute` function executes the Instruction, and returns a
 pair of an updated Player and a `Cmd (Result Failure Action)`.
 
