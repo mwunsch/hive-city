@@ -110,14 +110,10 @@ update msg game =
                     in
                         case game.player.action of
                             Action.Move ->
-                                Player.execute (Player.Moving fighter pos) game.player
-                                    |> Tuple.mapFirst (\p -> { game | player = p })
-                                    |> Tuple.mapSecond (Cmd.map Complete)
+                                update (Roll <| Player.Moving fighter pos) game
 
                             Action.Run ->
-                                Player.execute (Player.Running fighter pos) game.player
-                                    |> Tuple.mapFirst (\p -> { game | player = p })
-                                    |> Tuple.mapSecond (Cmd.map Complete)
+                                update (Roll <| Player.Running fighter pos) game
 
                             _ ->
                                 if Tabletop.isWithinDistance 2 fighter.position pos then
