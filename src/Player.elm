@@ -6,6 +6,7 @@ import Gang exposing (Gang)
 import Maybe exposing (andThen)
 import Model exposing (Model)
 import Svg exposing (Svg, g)
+import Svg.Attributes exposing (fill)
 import Tabletop exposing (Tabletop, Position)
 import Task exposing (Task)
 import Turn exposing (Phase)
@@ -18,6 +19,7 @@ type alias Player =
     , movementIntention : Position
     , action : Action
     , target : Maybe Model.Id
+    , color : String
     }
 
 
@@ -28,6 +30,7 @@ init table =
     , movementIntention = Tabletop.center table
     , action = Await
     , target = Nothing
+    , color = "blue"
     }
 
 
@@ -151,6 +154,13 @@ view player phase message =
     getSelectedGangMember player
         |> Maybe.map (actionView player phase message)
         |> Maybe.withDefault (Action.emptyView)
+
+
+gangView : Player -> (Model -> msg) -> Svg msg
+gangView player msg =
+    Gang.toList player.gang
+        |> List.map (\fighter -> Model.view fighter (msg fighter))
+        |> g [ fill player.color ]
 
 
 actionView : Player -> Phase -> (Action -> msg) -> Model -> Svg msg
