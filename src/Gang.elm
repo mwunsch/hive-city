@@ -1,4 +1,4 @@
-module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toList, toArray, get, map, generator, positionedGenerator, view)
+module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toList, toArray, get, map, generator, positionedGenerator)
 
 import Array exposing (Array)
 import Dict exposing (Dict, toList)
@@ -160,10 +160,3 @@ positionedGenerator table =
                         |> Random.map (Dict.fromList)
                         |> Random.map (\fighters -> Gang { gang | roster = fighters })
             )
-
-
-view : Gang -> (Model -> msg) -> Svg msg
-view gang msg =
-    toList gang
-        |> List.map (\fighter -> Model.view fighter (msg fighter))
-        |> g []

@@ -467,7 +467,7 @@ view game =
                 ]
                 [ Tabletop.view game.tabletop
                 , actionSelection
-                , Gang.view game.player.gang Select
+                , Player.gangView game.player Select
                 ]
     in
         Html.div []

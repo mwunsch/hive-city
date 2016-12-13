@@ -20,7 +20,7 @@ init =
 
         players =
             ( Player.init table
-            , Player.init table
+            , Player.init table |> \player -> { player | color = "red" }
             )
     in
         { players = players

@@ -367,7 +367,7 @@ view model msg =
                 if model.selected then
                     "white"
                 else
-                    "black"
+                    "inherit"
             , x modelX
             , y modelY
             , onClickWithoutPropagation msg
