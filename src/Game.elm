@@ -1,6 +1,8 @@
 module Game exposing (..)
 
+import Gang
 import Player exposing (Player)
+import Random exposing (Generator)
 import Tabletop exposing (Tabletop)
 import Turn exposing (Turn)
 
@@ -37,3 +39,15 @@ player1 =
 player2 : Game -> Player
 player2 =
     .players >> Tuple.second
+
+
+generator : Generator Game
+generator =
+    let
+        game =
+            init
+    in
+        game.players
+            |> Tuple.mapFirst (\player -> Gang.positionedGenerator game.tabletop |> Random.map (\gang -> { player | gang = gang }))
+            |> Tuple.mapSecond (\player -> Gang.positionedGenerator game.tabletop |> Random.map (\gang -> { player | gang = gang }))
+            |> uncurry (Random.map2 (\player1 player2 -> { game | players = ( player1, player2 ) }))
