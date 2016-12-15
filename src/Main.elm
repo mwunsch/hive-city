@@ -3,6 +3,7 @@ module Main exposing (..)
 import Action exposing (Action, Failure)
 import Array
 import Dice
+import Game exposing (Game)
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.Events exposing (on, onClick)
@@ -47,6 +48,7 @@ type alias GameState =
     , turn : Turn
     , contextMessage : Maybe ContextMessage
     , rolling : Maybe DiceRoll
+    , game : Game
     }
 
 
@@ -68,10 +70,12 @@ init =
           , turn = Turn.init
           , contextMessage = Nothing
           , rolling = Nothing
+          , game = Game.init
           }
         , Cmd.batch
             [ Task.perform Resize Window.width
             , Random.generate Generate (Gang.positionedGenerator table)
+            , Random.generate Begin (Game.generator)
             ]
         )
 
@@ -93,11 +97,17 @@ type Msg
     | Generate Gang
     | NoOp
     | Log String String
+    | Begin Game
 
 
 update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
+        Begin newGame ->
+            ( { game | game = newGame }
+            , Cmd.none
+            )
+
         Select model ->
             ( { game | player = Player.selectModel game.player model.id }, Cmd.none )
 
