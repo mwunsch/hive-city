@@ -104,8 +104,9 @@ update : Msg -> GameState -> ( GameState, Cmd Msg )
 update msg game =
     case msg of
         Begin newGame ->
-            { game | game = Game.update (Game.Begin newGame) game.game }
-                |> (flip (,)) Cmd.none
+            ( { game | game = newGame }
+            , Cmd.none
+            )
 
         Select model ->
             ( { game | player = Player.selectModel game.player model.id }, Cmd.none )

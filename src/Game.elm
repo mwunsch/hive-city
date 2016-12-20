@@ -51,14 +51,3 @@ generator =
             |> Tuple.mapFirst (\player -> Gang.positionedGenerator game.tabletop |> Random.map (\gang -> { player | gang = gang }))
             |> Tuple.mapSecond (\player -> Gang.positionedGenerator game.tabletop |> Random.map (\gang -> { player | gang = gang }))
             |> uncurry (Random.map2 (\player1 player2 -> { game | players = ( player1, player2 ) }))
-
-
-type Msg
-    = Begin Game
-
-
-update : Msg -> Game -> Game
-update msg game =
-    case msg of
-        Begin newGame ->
-            newGame
