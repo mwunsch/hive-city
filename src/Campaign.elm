@@ -5,6 +5,7 @@ import Html exposing (Html)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Html.Attributes
 import Task
 import Window
 
@@ -32,7 +33,7 @@ type alias Campaign =
 init : ( Campaign, Cmd Msg )
 init =
     { game = Game.init
-    , window = { width = 640, height = 480 }
+    , window = { width = 1334, height = 750 }
     }
         ! [ Task.perform Resize Window.size
           , Random.generate Begin Game.generator
@@ -88,15 +89,42 @@ view campaign =
     let
         game =
             campaign.game
-    in
-        svg
-            [ viewBox
-                ([ 0, 0, game.tabletop.width, game.tabletop.height ]
-                    |> List.map toString
-                    |> String.join " "
-                )
-            , width (campaign.window.width |> toString)
-            , height (campaign.window.height |> toString)
-            ]
-        <|
+
+        top =
+            svg
+                [ x "0"
+                , y "0"
+                , height "10%"
+                ]
+                [ rect [ x "0", y "0", height "100%", width "100%", fill "green" ] [] ]
+
+        bottom =
+            svg
+                [ x "0"
+                , y "90%"
+                , height "10%"
+                ]
+                [ rect [ height "100%", width "100%", fill "purple" ] [] ]
+
+        gameplay =
             Game.view game (always NoOp)
+                |> svg
+                    [ viewBox
+                        ([ 0, 0, game.tabletop.width, game.tabletop.height ]
+                            |> List.map toString
+                            |> String.join " "
+                        )
+                    , height "80%"
+                    , y "10%"
+                    ]
+    in
+        [ top, gameplay, bottom ]
+            |> svg
+                [ width (campaign.window.width |> toString)
+                , height (campaign.window.height |> toString)
+                , x "0"
+                , y "0"
+                ]
+            |> List.repeat 1
+            |> Html.div
+                [ Html.Attributes.style [ ( "background-color", "black" ) ] ]
