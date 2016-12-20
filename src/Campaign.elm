@@ -5,6 +5,8 @@ import Html exposing (Html)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Task
+import Window
 
 
 main : Program Never Campaign Msg
@@ -23,12 +25,18 @@ main =
 
 type alias Campaign =
     { game : Game
+    , window : Window.Size
     }
 
 
 init : ( Campaign, Cmd Msg )
 init =
-    { game = Game.init } ! [ Random.generate Begin Game.generator ]
+    { game = Game.init
+    , window = { width = 640, height = 480 }
+    }
+        ! [ Task.perform Resize Window.size
+          , Random.generate Begin Game.generator
+          ]
 
 
 
@@ -37,6 +45,7 @@ init =
 
 type Msg
     = Begin Game
+    | Resize Window.Size
     | NoOp
 
 
@@ -52,6 +61,11 @@ update msg campaign =
                 , Cmd.none
                 )
 
+            Resize ({ width, height } as size) ->
+                ( { campaign | window = size }
+                , Cmd.none
+                )
+
             NoOp ->
                 noop
 
@@ -62,7 +76,7 @@ update msg campaign =
 
 subscriptions : Campaign -> Sub Msg
 subscriptions campaign =
-    Sub.none
+    Sub.batch [ Window.resizes Resize ]
 
 
 
