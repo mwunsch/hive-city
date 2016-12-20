@@ -95,6 +95,8 @@ view campaign =
                     |> List.map toString
                     |> String.join " "
                 )
+            , width (campaign.window.width |> toString)
+            , height (campaign.window.height |> toString)
             ]
         <|
             Game.view game (always NoOp)
