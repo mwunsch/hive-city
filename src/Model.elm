@@ -357,24 +357,33 @@ view model msg =
             "rotate("
                 ++ String.join " " [ toString bearingDegrees, modelX, modelY ]
                 ++ ")"
+
+        size =
+            Tabletop.millimeter 25 |> toString
     in
-        text_
-            [ fontSize (Tabletop.millimeter 25 |> toString)
-            , fontFamily "monospace"
-            , textAnchor "middle"
-            , alignmentBaseline "middle"
-            , fill <|
-                if model.selected then
-                    "white"
-                else
-                    "inherit"
-            , x modelX
-            , y modelY
-            , onClickWithoutPropagation msg
+        g
+            [ onClickWithoutPropagation msg
             , Svg.Attributes.cursor "pointer"
-            , transform rotation
+            , class "model"
+            , id ("model" ++ toString model.id)
             ]
-            [ text (model.fighterType |> toString |> String.left 1) ]
+            [ circle [ cx modelX, cy modelY, r size, opacity "0.35" ] []
+            , text_
+                [ fontSize size
+                , fontFamily "monospace"
+                , textAnchor "middle"
+                , alignmentBaseline "middle"
+                , fill <|
+                    if model.selected then
+                        "white"
+                    else
+                        "black"
+                , x modelX
+                , y modelY
+                , transform rotation
+                ]
+                [ text (model.fighterType |> toString |> String.left 1) ]
+            ]
 
 
 viewProfile : Model -> Html msg
