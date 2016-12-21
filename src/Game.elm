@@ -4,7 +4,7 @@ import Gang
 import Model exposing (Model)
 import Player exposing (Player)
 import Random exposing (Generator)
-import Svg exposing (Svg, g)
+import Svg exposing (Svg)
 import Tabletop exposing (Tabletop)
 import Turn exposing (Turn)
 
