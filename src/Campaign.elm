@@ -2,6 +2,7 @@ module Campaign exposing (..)
 
 import Game exposing (Game)
 import Html exposing (Html)
+import Model exposing (Model)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -46,6 +47,7 @@ init =
 
 type Msg
     = Begin Game
+    | Select Model
     | Resize Window.Size
     | NoOp
 
@@ -55,10 +57,18 @@ update msg campaign =
     let
         noop =
             ( campaign, Cmd.none )
+
+        playerOne =
+            Game.player1 campaign.game
     in
         case msg of
             Begin newGame ->
                 ( { campaign | game = newGame }
+                , Cmd.none
+                )
+
+            Select model ->
+                ( { campaign | game = Game.selectFriendlyModel campaign.game model }
                 , Cmd.none
                 )
 
@@ -127,7 +137,7 @@ view campaign =
             Html.div [ id "controls" ] []
 
         gameplay =
-            Game.view game (always NoOp)
+            Game.view game Select
                 |> svg
                     [ width "100%"
                     , viewBox
