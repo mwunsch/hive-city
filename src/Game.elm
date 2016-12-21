@@ -55,6 +55,15 @@ generator =
             |> uncurry (Random.map2 (\player1 player2 -> { game | players = ( player1, player2 ) }))
 
 
+selectFriendlyModel : Game -> Model -> Game
+selectFriendlyModel game model =
+    { game
+        | players =
+            game.players
+                |> Tuple.mapFirst (\one -> Player.selectModel one model.id)
+    }
+
+
 view : Game -> (Model -> msg) -> List (Svg msg)
 view game msg =
     [ Tabletop.view game.tabletop
