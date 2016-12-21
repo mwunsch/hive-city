@@ -5,8 +5,8 @@ import Html exposing (Html)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Html.Attributes
 import Task
+import Utilities exposing (textNode)
 import Window
 
 
@@ -84,47 +84,62 @@ subscriptions campaign =
 -- VIEW
 
 
-view : Campaign -> Svg Msg
+css : Html msg
+css =
+    """
+#canvas {
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#messaging {
+  background-color: green;
+  min-height: 10%;
+  width: 100%;
+  flex-grow: 2;
+}
+
+#controls {
+  background-color: purple;
+  min-height: 10%;
+  width: 100%;
+  flex-grow: 2;
+}
+    """
+        |> textNode
+        |> Html.node "style" [ type_ "text/css" ]
+
+
+view : Campaign -> Html Msg
 view campaign =
     let
         game =
             campaign.game
 
         top =
-            svg
-                [ x "0"
-                , y "0"
-                , height "10%"
-                ]
-                [ rect [ x "0", y "0", height "100%", width "100%", fill "green" ] [] ]
+            Html.div [ id "messaging" ] []
 
         bottom =
-            svg
-                [ x "0"
-                , y "90%"
-                , height "10%"
-                ]
-                [ rect [ height "100%", width "100%", fill "purple" ] [] ]
+            Html.div [ id "controls" ] []
 
         gameplay =
             Game.view game (always NoOp)
                 |> svg
-                    [ viewBox
+                    [ width "100%"
+                    , viewBox
                         ([ 0, 0, game.tabletop.width, game.tabletop.height ]
                             |> List.map toString
                             |> String.join " "
                         )
-                    , height "80%"
-                    , y "10%"
+                    , id "gameplay"
                     ]
     in
         [ top, gameplay, bottom ]
-            |> svg
-                [ width (campaign.window.width |> toString)
-                , height (campaign.window.height |> toString)
-                , x "0"
-                , y "0"
-                ]
+            |> Html.div [ id "canvas" ]
             |> List.repeat 1
-            |> Html.div
-                [ Html.Attributes.style [ ( "background-color", "black" ) ] ]
+            |> (::) css
+            |> Html.main_ []
