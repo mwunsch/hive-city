@@ -2,6 +2,7 @@ module Campaign exposing (..)
 
 import Game exposing (Game)
 import Html exposing (Html)
+import Html.Attributes
 import Model exposing (Model)
 import Random
 import Svg exposing (..)
@@ -57,9 +58,6 @@ update msg campaign =
     let
         noop =
             ( campaign, Cmd.none )
-
-        playerOne =
-            Game.player1 campaign.game
     in
         case msg of
             Begin newGame ->
@@ -107,14 +105,12 @@ css =
 }
 
 #messaging {
-  background-color: green;
   min-height: 10%;
   width: 100%;
   flex-grow: 2;
 }
 
 #controls {
-  background-color: purple;
   min-height: 10%;
   width: 100%;
   flex-grow: 2;
@@ -130,8 +126,15 @@ view campaign =
         game =
             campaign.game
 
+        activePlayer =
+            Game.activePlayer game
+
         top =
-            Html.div [ id "messaging" ] []
+            Html.div
+                [ id "messaging"
+                , Html.Attributes.style [ ( "background-color", activePlayer.color ) ]
+                ]
+                []
 
         bottom =
             Html.div [ id "controls" ] []

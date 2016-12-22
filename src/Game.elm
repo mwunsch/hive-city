@@ -12,8 +12,13 @@ import Turn exposing (Turn)
 type alias Game =
     { players : ( Player, Player )
     , tabletop : Tabletop
-    , turn : ( Turn, Player )
+    , turn : ( Turn, ActivePlayer )
     }
+
+
+type ActivePlayer
+    = PlayerOne
+    | PlayerTwo
 
 
 init : Game
@@ -29,17 +34,47 @@ init =
     in
         { players = players
         , tabletop = table
-        , turn = ( Turn.init, Tuple.first players )
+        , turn = ( Turn.init, PlayerOne )
         }
 
 
-player1 : Game -> Player
-player1 =
+activePlayer : Game -> Player
+activePlayer game =
+    case Tuple.second game.turn of
+        PlayerOne ->
+            Tuple.first game.players
+
+        PlayerTwo ->
+            Tuple.second game.players
+
+
+mapActivePlayer : (Player -> Player) -> Game -> ( Player, Player )
+mapActivePlayer transform game =
+    case Tuple.second game.turn of
+        PlayerOne ->
+            Tuple.mapFirst transform game.players
+
+        PlayerTwo ->
+            Tuple.mapSecond transform game.players
+
+
+mapEnemyPlayer : (Player -> Player) -> Game -> ( Player, Player )
+mapEnemyPlayer transform game =
+    case Tuple.second game.turn of
+        PlayerOne ->
+            Tuple.mapSecond transform game.players
+
+        PlayerTwo ->
+            Tuple.mapFirst transform game.players
+
+
+playerOne : Game -> Player
+playerOne =
     .players >> Tuple.first
 
 
-player2 : Game -> Player
-player2 =
+playerTwo : Game -> Player
+playerTwo =
     .players >> Tuple.second
 
 
@@ -58,15 +93,13 @@ generator =
 selectFriendlyModel : Game -> Model -> Game
 selectFriendlyModel game model =
     { game
-        | players =
-            game.players
-                |> Tuple.mapFirst (\one -> Player.selectModel one model.id)
+        | players = mapActivePlayer (flip Player.selectModel <| model.id) game
     }
 
 
 view : Game -> (Model -> msg) -> List (Svg msg)
 view game msg =
     [ Tabletop.view game.tabletop
-    , Player.gangView (player1 game) msg
-    , Player.gangView (player2 game) msg
+    , Player.gangView (playerOne game) msg
+    , Player.gangView (playerTwo game) msg
     ]

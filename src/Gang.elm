@@ -6,7 +6,6 @@ import List
 import Maybe
 import Model exposing (Model, Id)
 import Random exposing (Generator, andThen)
-import Svg exposing (Svg, g)
 import Tabletop exposing (Tabletop)
 import Uuid exposing (Uuid, uuid)
 
@@ -127,6 +126,11 @@ get id (Gang { roster }) =
 map : (Id -> Model -> Model) -> Gang -> Gang
 map transform (Gang params) =
     Gang { params | roster = Dict.map transform params.roster }
+
+
+member : Gang -> Model -> Bool
+member (Gang { roster }) model =
+    Dict.member model.id roster
 
 
 generator : Generator Gang
