@@ -4,6 +4,7 @@ import Game exposing (Game)
 import Gang exposing (Gang)
 import Html exposing (Html)
 import Html.Attributes
+import Keyboard exposing (KeyCode)
 import Model exposing (Model)
 import Mouse
 import Player exposing (Player)
@@ -54,6 +55,7 @@ type Msg
     = Begin Game
     | Select Model
     | Hover Mouse.Position
+    | KeyPress KeyCode
     | Resize Window.Size
     | NoOp
 
@@ -97,6 +99,21 @@ update msg campaign =
                     , Cmd.none
                     )
 
+            KeyPress key ->
+                case key of
+                    27 ->
+                        -- ESCAPE
+                        ( { campaign
+                            | game =
+                                campaign.game
+                                    |> Game.mapActivePlayer (\p -> Player.deselectAll p)
+                          }
+                        , Cmd.none
+                        )
+
+                    _ ->
+                        noop
+
             Resize ({ width, height } as size) ->
                 ( { campaign | window = size }
                 , Cmd.none
@@ -127,7 +144,6 @@ tabletopPositionFromMousePosition { x, y } { game, window } =
         ( x, y )
             |> Tuple.mapFirst (\x -> ((toFloat x) - xOffset) / scale)
             |> Tuple.mapSecond (\y -> ((toFloat y) - yOffset) / scale)
-            |> Debug.log "x,y"
 
 
 
@@ -142,6 +158,7 @@ subscriptions campaign =
     in
         Sub.batch
             [ Window.resizes Resize
+            , Keyboard.presses KeyPress
             , case activePlayer.selection of
                 Just _ ->
                     Mouse.moves Hover
