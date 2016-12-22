@@ -2,9 +2,10 @@ module Utilities exposing (..)
 
 import Html exposing (Html, Attribute)
 import Html.Attributes exposing (attribute, class)
-import Html.Events exposing (onWithOptions)
+import Html.Events exposing (onWithOptions, on)
 import Json.Decode as Json
 import List
+import Mouse
 import Svg exposing (Svg, foreignObject)
 
 
@@ -27,3 +28,9 @@ htmlAsSvg name attrs =
             ]
         >> List.repeat 1
         >> foreignObject attrs
+
+
+onEventWithPosition : (Mouse.Position -> msg) -> String -> Html.Attribute msg
+onEventWithPosition message event =
+    on event <|
+        Json.map message Mouse.position

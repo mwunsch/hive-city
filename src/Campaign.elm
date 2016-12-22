@@ -12,7 +12,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop
 import Task
-import Utilities exposing (textNode)
+import Utilities exposing (textNode, onEventWithPosition)
 import Window
 
 
