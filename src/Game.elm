@@ -48,24 +48,30 @@ activePlayer game =
             Tuple.second game.players
 
 
-mapActivePlayer : (Player -> Player) -> Game -> ( Player, Player )
+mapActivePlayer : (Player -> Player) -> Game -> Game
 mapActivePlayer transform game =
-    case Tuple.second game.turn of
-        PlayerOne ->
-            Tuple.mapFirst transform game.players
+    { game
+        | players =
+            case Tuple.second game.turn of
+                PlayerOne ->
+                    Tuple.mapFirst transform game.players
 
-        PlayerTwo ->
-            Tuple.mapSecond transform game.players
+                PlayerTwo ->
+                    Tuple.mapSecond transform game.players
+    }
 
 
-mapEnemyPlayer : (Player -> Player) -> Game -> ( Player, Player )
+mapEnemyPlayer : (Player -> Player) -> Game -> Game
 mapEnemyPlayer transform game =
-    case Tuple.second game.turn of
-        PlayerOne ->
-            Tuple.mapSecond transform game.players
+    { game
+        | players =
+            case Tuple.second game.turn of
+                PlayerOne ->
+                    Tuple.mapSecond transform game.players
 
-        PlayerTwo ->
-            Tuple.mapFirst transform game.players
+                PlayerTwo ->
+                    Tuple.mapFirst transform game.players
+    }
 
 
 playerOne : Game -> Player
@@ -92,9 +98,7 @@ generator =
 
 selectFriendlyModel : Game -> Model -> Game
 selectFriendlyModel game model =
-    { game
-        | players = mapActivePlayer (flip Player.selectModel <| model.id) game
-    }
+    mapActivePlayer (flip Player.selectModel <| model.id) game
 
 
 view : Game -> (Model -> msg) -> List (Svg msg)
