@@ -126,20 +126,23 @@ update msg campaign =
 tabletopPositionFromMousePosition : Mouse.Position -> Campaign -> Tabletop.Position
 tabletopPositionFromMousePosition { x, y } { game, window } =
     let
-        tableHeight =
-            (toFloat window.height) * 0.8
+        gameHeight =
+            if window.height < window.width then
+                (toFloat window.height) * 0.8
+            else
+                (toFloat window.width) / (Tabletop.aspectRatio game.tabletop)
 
-        tableWidth =
-            tableHeight * (Tabletop.aspectRatio game.tabletop)
+        gameWidth =
+            gameHeight * (Tabletop.aspectRatio game.tabletop)
 
         xOffset =
-            ((toFloat window.width) - tableWidth) / 2
+            ((toFloat window.width) - gameWidth) / 2
 
         yOffset =
-            ((toFloat window.height) - tableHeight) / 2
+            ((toFloat window.height) - gameHeight) / 2
 
         scale =
-            tableWidth / (toFloat game.tabletop.width)
+            gameWidth / (toFloat game.tabletop.width)
     in
         ( x, y )
             |> Tuple.mapFirst (\x -> ((toFloat x) - xOffset) / scale)
