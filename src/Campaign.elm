@@ -128,7 +128,7 @@ update msg campaign =
                         ( { campaign
                             | game =
                                 campaign.game
-                                    |> Game.mapActivePlayer (\p -> Player.deselectAll p)
+                                    |> Game.mapActivePlayer (Player.deselectAll)
                           }
                         , Cmd.none
                         )
