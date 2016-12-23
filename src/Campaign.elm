@@ -55,6 +55,7 @@ type Msg
     = Begin Game
     | Select Model
     | Hover Mouse.Position
+    | Click Mouse.Position
     | KeyPress KeyCode
     | Resize Window.Size
     | NoOp
@@ -95,6 +96,27 @@ update msg campaign =
                         | game =
                             campaign.game
                                 |> Game.mapActivePlayer (\p -> { p | movementIntention = pos, gang = pivot })
+                      }
+                    , Cmd.none
+                    )
+
+            Click ({ x, y } as mouse) ->
+                let
+                    pos : Tabletop.Position
+                    pos =
+                        tabletopPositionFromMousePosition mouse campaign
+                in
+                    ( { campaign
+                        | game =
+                            Player.getSelectedGangMember activePlayer
+                                |> Maybe.map
+                                    (\{ position } ->
+                                        if Tabletop.isWithinDistance 2 position pos then
+                                            campaign.game
+                                        else
+                                            Game.mapActivePlayer (Player.deselectAll) campaign.game
+                                    )
+                                |> Maybe.withDefault campaign.game
                       }
                     , Cmd.none
                     )
@@ -162,6 +184,7 @@ subscriptions campaign =
         Sub.batch
             [ Window.resizes Resize
             , Keyboard.presses KeyPress
+            , Mouse.clicks Click
             , case activePlayer.selection of
                 Just _ ->
                     Mouse.moves Hover
