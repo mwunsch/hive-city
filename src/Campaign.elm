@@ -220,6 +220,11 @@ css =
   min-height: 10%;
   width: 100%;
   flex-grow: 2;
+  font-family: monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  color: #fff;
 }
     """
         |> textNode
@@ -242,8 +247,22 @@ view campaign =
                 ]
                 []
 
+        selectedFighterProfile =
+            Html.div
+                [ id "selected-profile"
+                , Html.Attributes.style [ ( "background-color", activePlayer.color ) ]
+                ]
+                [ Player.getSelectedGangMember activePlayer
+                    |> Maybe.map Model.viewProfile
+                    |> Maybe.withDefault (Html.table [] [])
+                ]
+
         bottom =
-            Html.div [ id "controls" ] []
+            Html.div [ id "controls" ]
+                [ selectedFighterProfile
+                , Html.div [] []
+                , Html.div [] []
+                ]
 
         gameplay =
             Game.view game Select

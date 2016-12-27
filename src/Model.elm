@@ -402,7 +402,7 @@ viewProfile model =
                 ]
     in
         table
-            [ Svg.Attributes.style "border-collapse: collapse; line-height: 0;" ]
+            [ Svg.Attributes.style "border-collapse: collapse;" ]
             [ colgroup [] [ col [] [] ]
             , tr [] <|
                 th [] [ Html.text (model.fighterType |> toString) ]
