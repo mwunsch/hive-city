@@ -152,10 +152,10 @@ await player =
 -- VIEW
 
 
-view : Player -> Phase -> (Action -> msg) -> Svg msg
-view player phase message =
+view : Player -> Phase -> Svg msg
+view player phase =
     getSelectedGangMember player
-        |> Maybe.map (actionView player phase message)
+        |> Maybe.map (actionView player phase)
         |> Maybe.withDefault (Action.emptyView)
 
 
@@ -166,8 +166,8 @@ gangView player msg =
         |> g [ fill player.color ]
 
 
-actionView : Player -> Phase -> (Action -> msg) -> Model -> Svg msg
-actionView player phase message fighter =
+actionView : Player -> Phase -> Model -> Svg msg
+actionView player phase fighter =
     case player.action of
         Await ->
             Action.viewSelection fighter

@@ -38,6 +38,11 @@ init =
         }
 
 
+turnPhase : Game -> Turn.Phase
+turnPhase =
+    .turn >> Tuple.first >> Turn.phase
+
+
 activePlayer : Game -> Player
 activePlayer game =
     case Tuple.second game.turn of
@@ -104,6 +109,7 @@ selectFriendlyModel game model =
 view : Game -> (Model -> msg) -> List (Svg msg)
 view game msg =
     [ Tabletop.view game.tabletop
+    , Player.view (activePlayer game) (turnPhase game)
     , Player.gangView (playerOne game) msg
     , Player.gangView (playerTwo game) msg
     ]
