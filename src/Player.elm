@@ -36,13 +36,16 @@ init table =
 
 selectModel : Player -> Model.Id -> Player
 selectModel player id =
-    { player
-        | gang =
+    let
+        select =
             .gang (deselectAll player)
                 |> Gang.update id (Maybe.map (\f -> { f | selected = True }))
-        , selection = Just id
-        , action = Await
-    }
+    in
+        { player
+            | gang = select
+            , selection = Gang.get id select |> Maybe.map (.id)
+            , action = Await
+        }
 
 
 deselectAll : Player -> Player
