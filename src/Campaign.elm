@@ -15,6 +15,7 @@ import Svg.Attributes exposing (..)
 import Tabletop
 import Task
 import Utilities exposing (textNode, onEventWithPosition)
+import View.Controls as Controls
 import Window
 
 
@@ -253,8 +254,23 @@ css =
 .command {
   padding: 1em;
   line-height: 1;
+  font-family: monospace;
   border-radius: 10%;
   cursor: pointer;
+  text-align: center;
+  display: block;
+}
+
+.command:disabled {
+  cursor: not-allowed;
+}
+
+.command > span {
+  display: block;
+}
+
+.command .command-symbol {
+  font-size: 1.5em;
 }
     """
         |> textNode
@@ -302,9 +318,10 @@ view campaign =
                 ]
 
         playerControls =
-            List.repeat 4 (Html.button [ class "command" ])
-                |> List.map2 (\key btn -> Html.text key |> List.repeat 1 |> btn) [ "q", "w", "e", "r" ]
-                |> Html.div [ id "player-commands" ]
+            Player.getSelectedGangMember activePlayer
+                |> Maybe.map (Action.select (Game.turnPhase game))
+                |> Maybe.withDefault ([])
+                |> (\actions -> Controls.view actions Command)
 
         bottom =
             Html.div [ id "controls" ]
