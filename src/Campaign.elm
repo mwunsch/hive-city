@@ -55,6 +55,7 @@ init =
 type Msg
     = Begin Game
     | Select Model
+    | Command Action
     | Hover Mouse.Position
     | Click Mouse.Position
     | KeyPress KeyCode
@@ -87,6 +88,11 @@ update msg campaign =
                   }
                 , Cmd.none
                 )
+
+            Command action ->
+                case action of
+                    _ ->
+                        noop
 
             Hover ({ x, y } as mouse) ->
                 let
@@ -233,6 +239,23 @@ css =
   align-items: stretch;
   color: #fff;
 }
+
+#controls > * {
+  min-width: 33%;
+}
+
+#player-commands {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.command {
+  padding: 1em;
+  line-height: 1;
+  border-radius: 10%;
+  cursor: pointer;
+}
     """
         |> textNode
         |> Html.node "style" [ type_ "text/css" ]
@@ -278,10 +301,15 @@ view campaign =
                     |> Maybe.withDefault (Html.table [] [])
                 ]
 
+        playerControls =
+            List.repeat 4 (Html.button [ class "command" ])
+                |> List.map2 (\key btn -> Html.text key |> List.repeat 1 |> btn) [ "q", "w", "e", "r" ]
+                |> Html.div [ id "player-commands" ]
+
         bottom =
             Html.div [ id "controls" ]
                 [ selectedFighterProfile
-                , Html.div [] []
+                , playerControls
                 , targetFighterProfile
                 ]
 
