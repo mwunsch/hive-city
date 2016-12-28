@@ -53,6 +53,16 @@ activePlayer game =
             Tuple.second game.players
 
 
+enemyPlayer : Game -> Player
+enemyPlayer game =
+    case Tuple.second game.turn of
+        PlayerOne ->
+            Tuple.second game.players
+
+        PlayerTwo ->
+            Tuple.first game.players
+
+
 mapActivePlayer : (Player -> Player) -> Game -> Game
 mapActivePlayer transform game =
     { game

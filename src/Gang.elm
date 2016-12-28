@@ -1,4 +1,4 @@
-module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toList, toArray, get, map, generator, positionedGenerator)
+module Gang exposing (Gang, init, empty, name, rename, roster, id, stash, recruit, update, fromList, toList, toArray, get, map, generator, positionedGenerator, member)
 
 import Array exposing (Array)
 import Dict exposing (Dict, toList)

@@ -55,6 +55,7 @@ deselectAll player =
             player.gang
                 |> Gang.map (\k v -> { v | selected = False })
         , selection = Nothing
+        , target = Nothing
     }
 
 
@@ -73,11 +74,6 @@ updateSelectedGangMember player transform =
         getSelectedGangMember player
             |> Maybe.map (updateGang)
             |> Maybe.withDefault player.gang
-
-
-getTargetedModel : Player -> Maybe Model
-getTargetedModel player =
-    player.target |> andThen ((flip Gang.get) player.gang)
 
 
 getClosestModelInWeaponRange : Player -> Weapon -> Maybe Model

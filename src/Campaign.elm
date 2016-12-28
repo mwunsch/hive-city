@@ -1,5 +1,6 @@
 module Campaign exposing (..)
 
+import Action exposing (Action, Failure)
 import Game exposing (Game)
 import Gang exposing (Gang)
 import Html exposing (Html)
@@ -77,7 +78,13 @@ update msg campaign =
                 )
 
             Select model ->
-                ( { campaign | game = Game.selectFriendlyModel campaign.game model }
+                ( { campaign
+                    | game =
+                        if Gang.member activePlayer.gang model then
+                            Game.selectFriendlyModel campaign.game model
+                        else
+                            Game.mapActivePlayer (\p -> { p | target = Just model.id }) campaign.game
+                  }
                 , Cmd.none
                 )
 
@@ -240,6 +247,9 @@ view campaign =
         activePlayer =
             Game.activePlayer game
 
+        enemyPlayer =
+            Game.enemyPlayer game
+
         top =
             Html.div
                 [ id "messaging"
@@ -257,11 +267,22 @@ view campaign =
                     |> Maybe.withDefault (Html.table [] [])
                 ]
 
+        targetFighterProfile =
+            Html.div
+                [ id "target-profile"
+                , Html.Attributes.style [ ( "background-color", enemyPlayer.color ) ]
+                ]
+                [ activePlayer.target
+                    |> Maybe.andThen (\id -> Gang.get id enemyPlayer.gang)
+                    |> Maybe.map Model.viewProfile
+                    |> Maybe.withDefault (Html.table [] [])
+                ]
+
         bottom =
             Html.div [ id "controls" ]
                 [ selectedFighterProfile
                 , Html.div [] []
-                , Html.div [] []
+                , targetFighterProfile
                 ]
 
         gameplay =
