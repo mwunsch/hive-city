@@ -93,7 +93,11 @@ update msg campaign =
             Command action ->
                 case action of
                     _ ->
-                        noop
+                        ( { campaign
+                            | game = Game.mapActivePlayer (\p -> { p | action = action }) campaign.game
+                          }
+                        , Cmd.none
+                        )
 
             Hover ({ x, y } as mouse) ->
                 let
@@ -324,8 +328,21 @@ view campaign =
                 , targetFighterProfile
                 ]
 
+        definitions =
+            defs []
+                [ Svg.clipPath [ id "clip-off-table" ]
+                    [ rect
+                        [ width (game.tabletop.width |> toString)
+                        , height (game.tabletop.height |> toString)
+                        ]
+                        []
+                    ]
+                , Tabletop.viewMarker
+                ]
+
         gameplay =
             Game.view game Select
+                |> (::) definitions
                 |> svg
                     [ width "100%"
                     , viewBox
