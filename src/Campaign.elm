@@ -317,16 +317,10 @@ view campaign =
                     |> Maybe.withDefault (Html.table [] [])
                 ]
 
-        playerControls =
-            Player.getSelectedGangMember activePlayer
-                |> Maybe.map (Action.select (Game.turnPhase game))
-                |> Maybe.withDefault ([])
-                |> (\actions -> Controls.view actions Command)
-
         bottom =
             Html.div [ id "controls" ]
                 [ selectedFighterProfile
-                , playerControls
+                , Controls.view activePlayer (Game.turnPhase game) Command
                 , targetFighterProfile
                 ]
 

@@ -3,7 +3,36 @@ module View.Controls exposing (..)
 import Action exposing (Action)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Player exposing (Player)
+import Turn exposing (Phase)
 import Utilities exposing (onClickWithoutPropagation)
+
+
+type ActionKey
+    = Q
+    | W
+    | E
+    | R
+
+
+keysForActions : List Action -> List ( ActionKey, Maybe Action )
+keysForActions actions =
+    [ Q, W, E, R ]
+        |> List.foldl
+            (\key ( results, acts ) ->
+                ( ( key, List.head acts ) :: results, (List.drop 1 acts) )
+            )
+            ( [], actions )
+        |> Tuple.first
+        |> List.reverse
+
+
+availableActions : Player -> Phase -> List ( ActionKey, Maybe Action )
+availableActions player phase =
+    Player.getSelectedGangMember player
+        |> Maybe.map (Action.select phase)
+        |> Maybe.withDefault ([])
+        |> keysForActions
 
 
 viewControl : String -> Maybe Action -> (Action -> msg) -> Html msg
@@ -30,15 +59,8 @@ viewControl key maybeAction msg =
                 ]
 
 
-view : List Action -> (Action -> msg) -> Html msg
-view actions msg =
-    [ "q", "w", "e", "r" ]
-        |> List.foldl
-            (\key ( results, actions ) ->
-                ( ( key, List.head actions ) :: results, (List.drop 1 actions) )
-            )
-            ( [], actions )
-        |> Tuple.first
-        |> List.reverse
-        |> List.map (\( key, action ) -> viewControl key action msg)
+view : Player -> Phase -> (Action -> msg) -> Html msg
+view player phase msg =
+    availableActions player phase
+        |> List.map (\( key, action ) -> viewControl (toString key) action msg)
         |> Html.div [ id "player-commands" ]
