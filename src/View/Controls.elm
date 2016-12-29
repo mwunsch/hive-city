@@ -1,9 +1,11 @@
 module View.Controls exposing (..)
 
 import Action exposing (Action)
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Player exposing (Player)
+import Task exposing (Task)
 import Turn exposing (Phase)
 import Utilities exposing (onClickWithoutPropagation)
 
@@ -33,6 +35,19 @@ availableActions player phase =
         |> Maybe.map (Action.select phase)
         |> Maybe.withDefault ([])
         |> keysForActions
+
+
+takeAction : List ( ActionKey, Maybe Action ) -> ActionKey -> Task Never Action
+takeAction actions key =
+    let
+        actionDict =
+            List.map (Tuple.mapFirst (toString)) actions
+                |> Dict.fromList
+    in
+        Dict.get (toString key) actionDict
+            |> Maybe.andThen (identity)
+            |> Maybe.map (Task.succeed)
+            |> Maybe.withDefault (Task.succeed Action.Await)
 
 
 viewControl : String -> Maybe Action -> (Action -> msg) -> Html msg

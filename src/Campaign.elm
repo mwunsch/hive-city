@@ -17,7 +17,7 @@ import Tabletop
 import Task
 import Turn
 import Utilities exposing (textNode, onEventWithPosition, onClickWithoutPropagation)
-import View.Controls as Controls
+import View.Controls as Controls exposing (ActionKey)
 import Window
 
 
@@ -79,6 +79,9 @@ update msg campaign =
 
         activePlayer =
             Game.activePlayer campaign.game
+
+        currentTurn =
+            Game.turn campaign.game
     in
         case msg of
             Begin newGame ->
@@ -167,6 +170,11 @@ update msg campaign =
                                     , Task.perform Roll (Task.succeed <| Player.Moving fighter pos)
                                     )
 
+                                Action.Run ->
+                                    ( campaign
+                                    , Task.perform Roll (Task.succeed <| Player.Running fighter pos)
+                                    )
+
                                 _ ->
                                     ( { campaign | game = Game.mapActivePlayer (Player.deselectAll) campaign.game }
                                     , Cmd.none
@@ -176,19 +184,47 @@ update msg campaign =
                             noop
 
             KeyPress key ->
-                case key of
-                    27 ->
-                        -- ESCAPE
-                        ( { campaign
-                            | game =
-                                campaign.game
-                                    |> Game.mapActivePlayer (Player.deselectAll)
-                          }
-                        , Cmd.none
-                        )
+                let
+                    actions =
+                        Controls.availableActions activePlayer (Turn.phase currentTurn)
 
-                    _ ->
-                        noop
+                    takeAction : Controls.ActionKey -> Cmd Msg
+                    takeAction =
+                        Controls.takeAction actions >> Task.perform Command
+                in
+                    case key of
+                        27 ->
+                            -- ESCAPE
+                            ( { campaign
+                                | game =
+                                    campaign.game
+                                        |> Game.mapActivePlayer (Player.deselectAll)
+                              }
+                            , Cmd.none
+                            )
+
+                        101 ->
+                            ( campaign
+                            , takeAction Controls.E
+                            )
+
+                        113 ->
+                            ( campaign
+                            , takeAction Controls.Q
+                            )
+
+                        114 ->
+                            ( campaign
+                            , takeAction Controls.R
+                            )
+
+                        119 ->
+                            ( campaign
+                            , takeAction Controls.W
+                            )
+
+                        _ ->
+                            noop
 
             Resize ({ width, height } as size) ->
                 ( { campaign | window = size }
