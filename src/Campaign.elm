@@ -1,6 +1,7 @@
 module Campaign exposing (..)
 
 import Action exposing (Action, Failure)
+import Dice exposing (Dice, oneD6)
 import Game exposing (Game)
 import Gang exposing (Gang)
 import Html exposing (Html)
@@ -8,7 +9,7 @@ import Html.Attributes
 import Keyboard exposing (KeyCode)
 import Model exposing (Model)
 import Mouse
-import Player exposing (Player)
+import Player exposing (Player, Instruction(..), DiceRoll)
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -36,6 +37,7 @@ main =
 type alias Campaign =
     { game : Game
     , window : Window.Size
+    , rolling : Maybe DiceRoll
     }
 
 
@@ -43,6 +45,7 @@ init : ( Campaign, Cmd Msg )
 init =
     { game = Game.init
     , window = { width = 1334, height = 750 }
+    , rolling = Nothing
     }
         ! [ Task.perform Resize Window.size
           , Random.generate Begin Game.generator
@@ -57,6 +60,8 @@ type Msg
     = Begin Game
     | Select Model
     | Command Action
+    | Roll Instruction
+    | Complete (Result Failure Action)
     | Hover Mouse.Position
     | Click Mouse.Position
     | KeyPress KeyCode
@@ -99,6 +104,29 @@ update msg campaign =
                         , Cmd.none
                         )
 
+            Roll instruction ->
+                let
+                    dice : Dice
+                    dice =
+                        campaign.rolling
+                            |> Maybe.map (\( num, val, _ ) -> num |> Dice.d val)
+                            |> Maybe.withDefault (oneD6)
+                in
+                    Player.execute instruction dice activePlayer
+                        |> Tuple.mapFirst
+                            (\p ->
+                                { campaign
+                                    | rolling = Nothing
+                                    , game = Game.mapActivePlayer (always p) campaign.game
+                                }
+                            )
+                        |> Tuple.mapSecond (Cmd.map Complete)
+
+            Complete result ->
+                ( { campaign | game = Game.mapActivePlayer (Player.await) campaign.game }
+                , Cmd.none
+                )
+
             Hover ({ x, y } as mouse) ->
                 let
                     pos : Tabletop.Position
@@ -124,20 +152,21 @@ update msg campaign =
                     pos =
                         tabletopPositionFromMousePosition mouse campaign
                 in
-                    ( { campaign
-                        | game =
-                            Player.getSelectedGangMember activePlayer
-                                |> Maybe.map
-                                    (\{ position } ->
-                                        if Tabletop.isWithinDistance 2 position pos then
-                                            campaign.game
-                                        else
-                                            Game.mapActivePlayer (Player.deselectAll) campaign.game
+                    case Player.getSelectedGangMember activePlayer of
+                        Just fighter ->
+                            case activePlayer.action of
+                                Action.Move ->
+                                    ( campaign
+                                    , Task.perform Roll (Task.succeed <| Player.Moving fighter pos)
                                     )
-                                |> Maybe.withDefault campaign.game
-                      }
-                    , Cmd.none
-                    )
+
+                                _ ->
+                                    ( { campaign | game = Game.mapActivePlayer (Player.deselectAll) campaign.game }
+                                    , Cmd.none
+                                    )
+
+                        Nothing ->
+                            noop
 
             KeyPress key ->
                 case key of

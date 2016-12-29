@@ -56,6 +56,7 @@ deselectAll player =
                 |> Gang.map (\k v -> { v | selected = False })
         , selection = Nothing
         , target = Nothing
+        , action = Await
     }
 
 
@@ -110,8 +111,8 @@ The caller of execute (likely the main `update` loop, is assumed to
 use the `Tuple.map*` functions to massage the returned pair.
 
 -}
-execute : Instruction -> Player -> ( Player, Cmd (Result Failure Action) )
-execute instruction player =
+execute : Instruction -> Dice -> Player -> ( Player, Cmd (Result Failure Action) )
+execute instruction dice player =
     case instruction of
         Moving fighter pos ->
             let
@@ -135,7 +136,7 @@ execute instruction player =
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , oneD6 |> Dice.roll (Model.shoot attacker weapon target >> Weapons.toResult MissedShot (Shoot weapon))
+            , dice |> Dice.roll (Model.shoot attacker weapon target >> Weapons.toResult MissedShot (Shoot weapon))
             )
 
 
