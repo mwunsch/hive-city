@@ -38,9 +38,34 @@ init =
         }
 
 
-turnPhase : Game -> Turn.Phase
-turnPhase =
-    .turn >> Tuple.first >> Turn.phase
+turn : Game -> Turn
+turn =
+    .turn >> Tuple.first
+
+
+advanceTurn : Game -> Game
+advanceTurn game =
+    let
+        currentPlayer =
+            game.turn |> Tuple.second
+
+        nextPhase =
+            turn game |> Turn.advance
+
+        nextPhasePlayer =
+            case Turn.phase nextPhase of
+                Turn.Movement ->
+                    case currentPlayer of
+                        PlayerOne ->
+                            PlayerTwo
+
+                        PlayerTwo ->
+                            PlayerOne
+
+                _ ->
+                    currentPlayer
+    in
+        { game | turn = ( nextPhase, nextPhasePlayer ) }
 
 
 activePlayer : Game -> Player
@@ -119,7 +144,7 @@ selectFriendlyModel game model =
 view : Game -> (Model -> msg) -> List (Svg msg)
 view game msg =
     [ Tabletop.view game.tabletop
-    , Player.view (activePlayer game) (turnPhase game)
+    , Player.view (activePlayer game) (turn game |> Turn.phase)
     , Player.gangView (playerOne game) msg
     , Player.gangView (playerTwo game) msg
     ]

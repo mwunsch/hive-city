@@ -15,7 +15,8 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Tabletop
 import Task
-import Utilities exposing (textNode, onEventWithPosition)
+import Turn
+import Utilities exposing (textNode, onEventWithPosition, onClickWithoutPropagation)
 import View.Controls as Controls
 import Window
 
@@ -62,6 +63,7 @@ type Msg
     | Command Action
     | Roll Instruction
     | Complete (Result Failure Action)
+    | Advance
     | Hover Mouse.Position
     | Click Mouse.Position
     | KeyPress KeyCode
@@ -124,6 +126,11 @@ update msg campaign =
 
             Complete result ->
                 ( { campaign | game = Game.mapActivePlayer (Player.await) campaign.game }
+                , Cmd.none
+                )
+
+            Advance ->
+                ( { campaign | game = Game.advanceTurn campaign.game }
                 , Cmd.none
                 )
 
@@ -261,6 +268,12 @@ css =
   min-height: 10%;
   width: 100%;
   flex-grow: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: monospace;
+  color: #fff;
 }
 
 #controls {
@@ -327,7 +340,18 @@ view campaign =
                 [ id "messaging"
                 , Html.Attributes.style [ ( "background-color", activePlayer.color ) ]
                 ]
-                []
+                [ Game.turn game
+                    |> (\turn ->
+                            (Turn.round turn |> toString) ++ " - " ++ (Turn.phase turn |> toString)
+                       )
+                    |> textNode
+                    |> Html.h2 []
+                , Html.button
+                    [ id "phase-advance"
+                    , onClickWithoutPropagation Advance
+                    ]
+                    [ Html.text "Next Phase →" ]
+                ]
 
         selectedFighterProfile =
             Html.div
@@ -353,7 +377,7 @@ view campaign =
         bottom =
             Html.div [ id "controls" ]
                 [ selectedFighterProfile
-                , Controls.view activePlayer (Game.turnPhase game) Command
+                , Controls.view activePlayer (Game.turn game |> Turn.phase) Command
                 , targetFighterProfile
                 ]
 
