@@ -270,16 +270,21 @@ subscriptions campaign =
     let
         activePlayer =
             Game.activePlayer campaign.game
+
+        currentPhase =
+            Game.turn campaign.game |> Turn.phase
     in
         Sub.batch
             [ Window.resizes Resize
             , Keyboard.presses KeyPress
             , Mouse.clicks Click
-            , case activePlayer.selection of
-                Just _ ->
-                    Mouse.moves Hover
+            , case currentPhase of
+                Turn.Movement ->
+                    activePlayer.selection
+                        |> Maybe.map (\_ -> Mouse.moves Hover)
+                        |> Maybe.withDefault Sub.none
 
-                Nothing ->
+                _ ->
                     Sub.none
             ]
 
