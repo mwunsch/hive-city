@@ -37,7 +37,7 @@ availableActions player phase =
         |> keysForActions
 
 
-takeAction : List ( ActionKey, Maybe Action ) -> ActionKey -> Task Never Action
+takeAction : List ( ActionKey, Maybe Action ) -> ActionKey -> Task ActionKey Action
 takeAction actions key =
     let
         actionDict =
@@ -47,7 +47,7 @@ takeAction actions key =
         Dict.get (toString key) actionDict
             |> Maybe.andThen (identity)
             |> Maybe.map (Task.succeed)
-            |> Maybe.withDefault (Task.succeed Action.Await)
+            |> Maybe.withDefault (Task.fail key)
 
 
 viewControl : String -> Maybe Action -> (Action -> msg) -> Html msg

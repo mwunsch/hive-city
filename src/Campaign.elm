@@ -190,7 +190,8 @@ update msg campaign =
 
                     takeAction : Controls.ActionKey -> Cmd Msg
                     takeAction =
-                        Controls.takeAction actions >> Task.perform Command
+                        Controls.takeAction actions
+                            >> Task.attempt (Result.map Command >> Result.withDefault NoOp)
                 in
                     case key of
                         27 ->
