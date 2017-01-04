@@ -160,7 +160,7 @@ positionedGenerator table =
                 in
                     Random.list (List.length fighters) (Tabletop.positionGenerator table)
                         |> Random.map
-                            (List.map2 (\( id, fighter ) pos -> ( id, { fighter | position = pos } )) fighters)
+                            (List.map2 (\( id, fighter ) pos -> ( id, Model.reposition fighter pos )) fighters)
                         |> Random.map (Dict.fromList)
                         |> Random.map (\fighters -> Gang { gang | roster = fighters })
             )

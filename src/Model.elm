@@ -16,6 +16,7 @@ From the rulebook:
 
 -}
 
+import Animation exposing (px)
 import Dice exposing (Die)
 import Html exposing (Html, table, th, td, tr, colgroup, col)
 import List
@@ -42,6 +43,7 @@ type alias Model =
     , name : String
     , equipment : List Weapon
     , bearing : Float
+    , transition : Animation.State
     }
 
 
@@ -180,6 +182,9 @@ init role =
 
                 Juve ->
                     juve
+
+        offTable =
+            Tabletop.offTable
     in
         { profile = template
         , position = Tabletop.offTable
@@ -193,6 +198,7 @@ init role =
         , name = "Mac McMadd"
         , equipment = [ knife ]
         , bearing = 0
+        , transition = Animation.style [ translate offTable ]
         }
 
 
@@ -231,6 +237,25 @@ generator role =
             |> Random.map (equip autopistol)
 
 
+translate : Position -> Animation.Property
+translate pos =
+    Animation.translate (px <| posX pos) (px <| posY pos)
+
+
+reposition : Model -> Position -> Model
+reposition fighter pos =
+    let
+        updatedTransition =
+            Animation.interrupt
+                [ Animation.set [ translate pos ] ]
+                fighter.transition
+    in
+        { fighter
+            | position = pos
+            , transition = updatedTransition
+        }
+
+
 type alias MovementError =
     ( String, Model )
 
@@ -251,6 +276,7 @@ attemptMove model pos =
             Ok
                 { model
                     | position = pos
+                    , transition = Animation.interrupt [ Animation.to [ translate pos ] ] model.transition
                     , remainingMove = allowableDistance
                 }
         else
@@ -258,6 +284,7 @@ attemptMove model pos =
                 ( "Can't move there"
                 , { model
                     | position = maxPosition
+                    , transition = Animation.interrupt [ Animation.to [ translate maxPosition ] ] model.transition
                     , remainingMove = 0
                   }
                 )
@@ -287,7 +314,11 @@ run model pos =
             Tabletop.positionFromDirection model.position pos (model.remainingMove * 2)
     in
         if (canRun model) then
-            { model | position = maxPosition, remainingMove = 0 }
+            { model
+                | position = maxPosition
+                , remainingMove = 0
+                , transition = Animation.interrupt [ Animation.to [ translate maxPosition ] ] model.transition
+            }
         else
             model
 
@@ -362,12 +393,13 @@ view model msg =
             Tabletop.millimeter 25 |> toString
     in
         g
-            [ onClickWithoutPropagation msg
-            , Svg.Attributes.cursor "pointer"
-            , class "model"
-            , id ("model" ++ toString model.id)
-            , Tabletop.transformTranslate (model.position)
-            ]
+            ([ onClickWithoutPropagation msg
+             , Svg.Attributes.cursor "pointer"
+             , class "model"
+             , id ("model" ++ toString model.id)
+             ]
+                ++ Animation.render model.transition
+            )
             [ circle [ cx "0", cy "0", r size, opacity "0.35" ] []
             , text_
                 [ fontSize size

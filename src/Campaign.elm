@@ -1,6 +1,7 @@
 module Campaign exposing (..)
 
 import Action exposing (Action, Failure)
+import Animation
 import Dice exposing (Dice, oneD6)
 import Game exposing (Game)
 import Gang exposing (Gang)
@@ -66,6 +67,7 @@ type Msg
     | Advance
     | Hover Mouse.Position
     | Click Mouse.Position
+    | Transition Animation.Msg
     | KeyPress KeyCode
     | Resize Window.Size
     | NoOp
@@ -183,6 +185,25 @@ update msg campaign =
                         Nothing ->
                             noop
 
+            Transition animation ->
+                let
+                    moveModels : Player -> Player
+                    moveModels player =
+                        { player
+                            | gang =
+                                player.gang
+                                    |> Gang.map (\_ model -> { model | transition = Animation.update animation model.transition })
+                        }
+                in
+                    ( { campaign
+                        | game =
+                            campaign.game
+                                |> Game.mapActivePlayer (moveModels)
+                                |> Game.mapEnemyPlayer (moveModels)
+                      }
+                    , Cmd.none
+                    )
+
             KeyPress key ->
                 let
                     actions =
@@ -272,6 +293,9 @@ subscriptions campaign =
         activePlayer =
             Game.activePlayer campaign.game
 
+        enemyPlayer =
+            Game.enemyPlayer campaign.game
+
         currentPhase =
             Game.turn campaign.game |> Turn.phase
     in
@@ -279,6 +303,7 @@ subscriptions campaign =
             [ Window.resizes Resize
             , Keyboard.presses KeyPress
             , Mouse.clicks Click
+            , Animation.subscription Transition ((List.append (Gang.toList activePlayer.gang) (Gang.toList enemyPlayer.gang)) |> List.map (.transition))
             , case currentPhase of
                 Turn.Movement ->
                     activePlayer.selection
