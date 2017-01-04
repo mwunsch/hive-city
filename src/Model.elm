@@ -355,7 +355,7 @@ view model msg =
 
         rotation =
             "rotate("
-                ++ String.join " " [ toString bearingDegrees, modelX, modelY ]
+                ++ String.join " " [ toString bearingDegrees, "0", "0" ]
                 ++ ")"
 
         size =
@@ -366,8 +366,9 @@ view model msg =
             , Svg.Attributes.cursor "pointer"
             , class "model"
             , id ("model" ++ toString model.id)
+            , Tabletop.transformTranslate (model.position)
             ]
-            [ circle [ cx modelX, cy modelY, r size, opacity "0.35" ] []
+            [ circle [ cx "0", cy "0", r size, opacity "0.35" ] []
             , text_
                 [ fontSize size
                 , fontFamily "monospace"
@@ -378,8 +379,8 @@ view model msg =
                         "white"
                     else
                         "black"
-                , x modelX
-                , y modelY
+                , x "0"
+                , y "0"
                 , transform rotation
                 ]
                 [ text (model.fighterType |> toString |> String.left 1) ]
