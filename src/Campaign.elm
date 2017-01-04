@@ -303,7 +303,9 @@ subscriptions campaign =
             [ Window.resizes Resize
             , Keyboard.presses KeyPress
             , Mouse.clicks Click
-            , Animation.subscription Transition ((List.append (Gang.toList activePlayer.gang) (Gang.toList enemyPlayer.gang)) |> List.map (.transition))
+            , ((Gang.toList activePlayer.gang) ++ (Gang.toList enemyPlayer.gang))
+                |> List.map (.transition)
+                |> Animation.subscription Transition
             , case currentPhase of
                 Turn.Movement ->
                     activePlayer.selection
