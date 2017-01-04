@@ -1,6 +1,6 @@
 .SUFFIXES:
 
-SRC := src/Main.elm
+SRC := src/Campaign.elm
 OBJDIR := dist
 OBJECT := $(OBJDIR)/index.js
 
