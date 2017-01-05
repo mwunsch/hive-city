@@ -82,6 +82,9 @@ update msg campaign =
         activePlayer =
             Game.activePlayer campaign.game
 
+        enemyPlayer =
+            Game.enemyPlayer campaign.game
+
         currentTurn =
             Game.turn campaign.game
     in
@@ -104,6 +107,33 @@ update msg campaign =
 
             Command action ->
                 case action of
+                    Action.Shoot weapon ->
+                        let
+                            maybeTarget : Maybe Model
+                            maybeTarget =
+                                Player.getSelectedGangMember activePlayer
+                                    |> Maybe.andThen
+                                        (Model.withinShootingRange (Gang.toList enemyPlayer.gang) weapon
+                                            >> List.head
+                                        )
+                        in
+                            ( { campaign
+                                | game =
+                                    campaign.game
+                                        |> Game.mapActivePlayer
+                                            (\player ->
+                                                { player
+                                                    | action = action
+                                                    , target = Maybe.map (.id) maybeTarget
+                                                }
+                                            )
+                                , rolling =
+                                    Player.getSelectedGangMember activePlayer
+                                        |> Maybe.map2 (\target attacker -> ( 1, 6, Player.Shooting attacker target weapon )) maybeTarget
+                              }
+                            , Cmd.none
+                            )
+
                     _ ->
                         ( { campaign
                             | game = Game.mapActivePlayer (\p -> { p | action = action }) campaign.game
@@ -446,7 +476,9 @@ view campaign =
         bottom =
             Html.div [ id "controls" ]
                 [ selectedFighterProfile
-                , Controls.view activePlayer (Game.turn game |> Turn.phase) Command
+                , campaign.rolling
+                    |> Maybe.map (\( num, val, instruction ) -> Controls.viewDice num val <| Roll instruction)
+                    |> Maybe.withDefault (Controls.view activePlayer (Game.turn game |> Turn.phase) Command)
                 , targetFighterProfile
                 ]
 

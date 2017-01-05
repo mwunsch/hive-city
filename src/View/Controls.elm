@@ -74,6 +74,24 @@ viewControl key maybeAction msg =
                 ]
 
 
+viewDice : Int -> Int -> msg -> Html msg
+viewDice num val msg =
+    let
+        diceStr =
+            (toString num) ++ "D" ++ (toString val)
+    in
+        Html.div [ id "player-commands" ]
+            [ button
+                [ class "command diceroll"
+                , title diceStr
+                , onClickWithoutPropagation msg
+                ]
+                [ span [ class "command-symbol" ] [ text "🎲" ]
+                , span [ class "command-hotkey" ] [ text diceStr ]
+                ]
+            ]
+
+
 view : Player -> Phase -> (Action -> msg) -> Html msg
 view player phase msg =
     availableActions player phase
