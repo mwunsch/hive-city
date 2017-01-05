@@ -111,7 +111,7 @@ The caller of execute (likely the main `update` loop, is assumed to
 use the `Tuple.map*` functions to massage the returned pair.
 
 -}
-execute : Instruction -> Dice -> Player -> ( Player, Cmd (Result Failure Action) )
+execute : Instruction -> Dice -> Player -> ( Player, Cmd (Result Failure Instruction) )
 execute instruction dice player =
     case instruction of
         Moving fighter pos ->
@@ -126,17 +126,17 @@ execute instruction dice player =
                             model
             in
                 ( { player | gang = Gang.update fighter.id (Maybe.map move) player.gang }
-                , Task.perform Ok (Task.succeed Move)
+                , Task.perform Ok (Task.succeed instruction)
                 )
 
         Running fighter pos ->
             ( { player | gang = Gang.update fighter.id (Maybe.map ((flip Model.run) pos)) player.gang }
-            , Task.perform Ok (Task.succeed Run)
+            , Task.perform Ok (Task.succeed instruction)
             )
 
         Shooting attacker target weapon ->
             ( { player | target = Just target.id }
-            , dice |> Dice.roll (Model.shoot attacker weapon target >> Weapons.toResult MissedShot (Shoot weapon))
+            , dice |> Dice.roll (Model.shoot attacker weapon target >> Weapons.toResult (MissedShot attacker target weapon) instruction)
             )
 
 

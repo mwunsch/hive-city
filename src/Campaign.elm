@@ -11,6 +11,7 @@ import Keyboard exposing (KeyCode)
 import Model exposing (Model)
 import Mouse
 import Player exposing (Player, Instruction(..), DiceRoll)
+import Projectile
 import Random
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -63,11 +64,12 @@ type Msg
     | Select Model
     | Command Action
     | Roll Instruction
-    | Complete (Result Failure Action)
+    | Complete (Result Failure Instruction)
     | Advance
     | Hover Mouse.Position
     | Click Mouse.Position
     | Transition Animation.Msg
+    | Travel Animation.Msg
     | KeyPress KeyCode
     | Resize Window.Size
     | NoOp
@@ -160,9 +162,21 @@ update msg campaign =
                         |> Tuple.mapSecond (Cmd.map Complete)
 
             Complete result ->
-                ( { campaign | game = Game.mapActivePlayer (Player.await) campaign.game }
-                , Cmd.none
-                )
+                let
+                    updateGame =
+                        case result of
+                            Ok (Shooting attacker target weapon) ->
+                                campaign.game
+                                    |> (\g ->
+                                            { g | projectile = Projectile.travel attacker.position target.position g.projectile }
+                                       )
+
+                            _ ->
+                                campaign.game
+                in
+                    ( { campaign | game = Game.mapActivePlayer (Player.await) updateGame }
+                    , Cmd.none
+                    )
 
             Advance ->
                 ( { campaign | game = Game.advanceTurn campaign.game }
@@ -233,6 +247,21 @@ update msg campaign =
                       }
                     , Cmd.none
                     )
+
+            Travel animation ->
+                ( { campaign
+                    | game =
+                        campaign.game
+                            |> (\g ->
+                                    { g
+                                        | projectile =
+                                            g.projectile
+                                                |> (\p -> { p | style = Animation.update animation p.style })
+                                    }
+                               )
+                  }
+                , Cmd.none
+                )
 
             KeyPress key ->
                 let
@@ -336,6 +365,7 @@ subscriptions campaign =
             , ((Gang.toList activePlayer.gang) ++ (Gang.toList enemyPlayer.gang))
                 |> List.map (.transition)
                 |> Animation.subscription Transition
+            , Animation.subscription Travel [ campaign.game.projectile.style ]
             , case currentPhase of
                 Turn.Movement ->
                     activePlayer.selection

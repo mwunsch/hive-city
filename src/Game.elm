@@ -3,6 +3,7 @@ module Game exposing (..)
 import Gang
 import Model exposing (Model)
 import Player exposing (Player)
+import Projectile exposing (Projectile)
 import Random exposing (Generator)
 import Svg exposing (Svg)
 import Tabletop exposing (Tabletop)
@@ -13,6 +14,7 @@ type alias Game =
     { players : ( Player, Player )
     , tabletop : Tabletop
     , turn : ( Turn, ActivePlayer )
+    , projectile : Projectile
     }
 
 
@@ -35,6 +37,7 @@ init =
         { players = players
         , tabletop = table
         , turn = ( Turn.init, PlayerOne )
+        , projectile = Projectile.init
         }
 
 
@@ -145,6 +148,7 @@ view : Game -> (Model -> msg) -> List (Svg msg)
 view game msg =
     [ Tabletop.view game.tabletop
     , Player.view (activePlayer game) (turn game |> Turn.phase)
+    , Projectile.view game.projectile
     , Player.gangView (playerOne game) msg
     , Player.gangView (playerTwo game) msg
     ]

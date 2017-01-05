@@ -29,7 +29,7 @@ type Action
 
 type Failure
     = FailedToMove
-    | MissedShot
+    | MissedShot Model Model Weapon
 
 
 select : Phase -> Model -> List Action
