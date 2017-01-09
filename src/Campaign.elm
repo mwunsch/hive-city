@@ -420,6 +420,11 @@ css =
   min-width: 33%;
 }
 
+#controls table {
+  width: 80%;
+  margin: 5%;
+}
+
 #player-commands {
   display: flex;
   justify-content: space-around;
